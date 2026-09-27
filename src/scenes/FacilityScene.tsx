@@ -23,7 +23,9 @@ export const JOBS: {label: string; day: 1 | 2}[] = [
 export const FacilityScene: React.FC = () => {
 	const frame = useCurrentFrame();
 	const b = useBeats();
-	const zoom = interpolate(frame, [0, 180], [1.0, 1.08], {extrapolateRight: 'clamp'});
+	const allShown = b('allShown');
+	// 背景はゆっくりズーム（7つ出そろったら止める）
+	const zoom = interpolate(frame, [0, allShown], [1.0, 1.08], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	// 「7つ！」をぐっと大きく（行き過ぎて戻る）
 	const sevenScale = overshoot(frame, b('jobs', 0.15), 16, 0.35);
 	const sevenGlow = interpolate(frame - b('jobs'), [0, 10, 40], [0, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
@@ -145,12 +147,37 @@ export const FacilityScene: React.FC = () => {
 					{at: b('comfort'), expression: 'gentle'},
 					{at: b('jobs'), pose: 'point', pointDir: 'left', expression: 'happy'},
 					{at: b('jobs', 1.0), pose: 'explain'},
+					// 7つ出そろったら説明を終えて、落ち着いて待つ（漫符なし・動きなし）
+					{at: allShown, pose: 'normal', expression: 'neutral'},
 				]}
-				nods={[b('comfort', 0.6)]}
+				nods={[b('comfort', 0.6), allShown]}
+				calm={frame >= allShown}
 				style={{right: 70, bottom: -20}}
 			/>
-			{frame >= b('jobs') ? (
+			{frame >= b('jobs') && frame < allShown ? (
 				<Sparkle x={1400} y={120} size={40} scale={overshoot(frame, b('jobs', 0.2), 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 5))} />
+			) : null}
+
+			{/* 確認の時間：短い見出しだけを静かに出す */}
+			{frame >= allShown ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 80,
+						top: 900,
+						background: COLORS.green,
+						color: '#fff',
+						fontSize: 56,
+						fontWeight: 700,
+						borderRadius: 999,
+						padding: '10px 44px',
+						boxShadow: `0 8px 20px ${COLORS.shadow}`,
+						whiteSpace: 'nowrap',
+						...appear(frame, allShown, 20, 15),
+					}}
+				>
+					7つの仕事を確認しよう！
+				</div>
 			) : null}
 		</SceneFrame>
 	);
