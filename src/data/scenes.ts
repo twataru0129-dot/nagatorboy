@@ -38,6 +38,11 @@ export type SceneDef = {
 	beats: Record<string, number>;
 	/** ナレーション原稿 */
 	narration: string[];
+	/**
+	 * ある beat のあと、最低何秒は画面をそのまま見せるか（読む時間の確保）。
+	 * 音声がもっと短くても、シーンの長さはこれより短くならない。
+	 */
+	holdAfter?: {beat: string; seconds: number};
 	/** <シーン名>.wav がない時だけ使う、仮のナレーション部品（at はナレーション開始からの秒） */
 	fallbackClips?: {file: string; at: number}[];
 };
@@ -67,13 +72,16 @@ export const SCENES = {
 	facility: {
 		label: 'SCENE2 長瀞げんきプラザ',
 		audioDelay: DELAY,
-		duration: 9.5,
+		duration: 17.9,
 		beats: {
 			place: 0.2, // 「ここ、長瀞げんきプラザで」
 			role: 1.1, // 「生活係は、」
 			comfort: 3.9, // 「みんなが気持ちよく過ごせるように動きます」
-			jobs: 6.8, // 「仕事は、大きく7つあります」→ 7つのカード
+			jobs: 6.8, // 「仕事は、大きく7つあります」→ 7つのカード（順番に出る）
+			allShown: 9.3, // 7つのカードがすべて出そろう → ここから読む時間
 		},
+		// 7つ全部が出そろってから、約8秒は一覧をそのまま見せる
+		holdAfter: {beat: 'allShown', seconds: 8},
 		narration: [
 			'ここ、長瀞げんきプラザで、生活係は、みんなが気持ちよく過ごせるように動きます。',
 			'仕事は、大きく7つあります。',
@@ -248,33 +256,32 @@ export const SCENES = {
 		audioDelay: DELAY,
 		// 最後に先生のアップ＋親指グッドで締めるため、少し長めに余裕をとる
 		tailPadding: 2.3,
-		duration: 34.4,
-		// ※ 下の秒数は、新しい ending.wav がまだないため「読み上げの速さ」から見積もった値です。
-		//   新しい ending.wav を入れたら、音声を聞いて合わせ直してください。
+		duration: 36.3,
+		// 秒数は ending.wav（33.8秒）の文の区切りに合わせてあります
 		beats: {
-			msg1: 0.14, // 「生活係は、」
-			msg1b: 1.74, // 「みんなが気持ちよく宿泊するための」
-			msg1c: 3.0, // 「大切な係です」
-			ask: 4.9, // 「分からなくなったら、」
-			print: 6.5, // 「プリントを見たり、」
-			askTeacher: 7.8, // 「先生に聞いたりしましょう」
-			review: 10.0, // 「仕事をもう一度確認します」
-			day1: 12.3, // 「1日目は、」
-			job1: 13.3, // リネンを配る
-			job2: 14.7, // ベッド・布団の準備
-			job3: 16.4, // お風呂掃除
-			job4: 17.7, // 健康チェックカード
-			day2: 20.3, // 「2日目は、」
-			job5: 21.3, // 荷物・布団整理の声かけ
-			job6: 23.5, // リネンを回収して返す
-			job7: 25.6, // 部屋の自主点検
-			final: 28.9, // 「みんなで協力して、楽しい宿泊学習にしよう！」
-			closeUp: 30.2, // 先生アップ＋親指グッド
+			msg1: 0.25, // 「生活係は、」
+			msg1b: 1.77, // 「みんなが気持ちよく宿泊するための」
+			msg1c: 4.0, // 「大切な係です」
+			ask: 6.47, // 「分からなくなったら、」
+			print: 7.63, // 「プリントを見たり、」
+			askTeacher: 8.77, // 「先生に聞いたりしましょう」
+			review: 11.55, // 「仕事をもう一度確認します」
+			day1: 14.19, // 「1日目は、」
+			job1: 15.34, // リネンを配る
+			job2: 16.78, // ベッド・布団の準備
+			job3: 18.78, // お風呂掃除
+			job4: 20.08, // 健康チェックカード
+			day2: 22.47, // 「2日目は、」
+			job5: 23.52, // 荷物・布団整理の声かけ
+			job6: 26.07, // リネンを回収して返す
+			job7: 28.14, // 部屋の自主点検
+			final: 30.52, // 「みんなで協力して、」
+			closeUp: 31.84, // 「楽しい宿泊学習にしよう！」→ 先生アップ＋親指グッド
 		},
-		// 新しい ending.wav がない間は、前の録音から原稿と同じ2文だけを使う
+		// ending.wav がない時だけ、前の録音から原稿と同じ2文を使う（予備）
 		fallbackClips: [
 			{file: 'audio/scenes/ending-parts/01-taisetsu.wav', at: 0},
-			{file: 'audio/scenes/ending-parts/06-kyouryoku.wav', at: 28.69},
+			{file: 'audio/scenes/ending-parts/06-kyouryoku.wav', at: 30.31},
 		],
 		narration: [
 			'生活係は、みんなが気持ちよく宿泊するための大切な係です。',
@@ -341,3 +348,21 @@ export const sceneTail = (key: SceneKey) => (SCENES[key] as SceneDef).tailPaddin
 
 /** 仮のナレーション部品（なければ空） */
 export const sceneFallbackClips = (key: SceneKey) => (SCENES[key] as SceneDef).fallbackClips ?? [];
+
+/** フェードアウトの長さ（SceneFrame の既定値 10 フレーム）＋少しの余白 */
+const HOLD_MARGIN = 0.4;
+
+/**
+ * シーンの長さ（秒）を決める
+ * audioLen があれば「開始前の間 + 音声 + 余裕」、なければ scenes.ts の duration。
+ * holdAfter があれば、その beat のあと指定秒数を必ず確保する。
+ */
+export const sceneDuration = (key: SceneKey, audioLen?: number | null) => {
+	const def = SCENES[key] as SceneDef;
+	let d = audioLen ? def.audioDelay + audioLen + sceneTail(key) : def.duration;
+	if (def.holdAfter) {
+		const beat = def.beats[def.holdAfter.beat] ?? 0;
+		d = Math.max(d, def.audioDelay + beat + def.holdAfter.seconds + HOLD_MARGIN);
+	}
+	return Math.ceil(d * FPS) / FPS;
+};

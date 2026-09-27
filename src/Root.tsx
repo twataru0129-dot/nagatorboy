@@ -10,9 +10,8 @@ import {
 	SCENE_ORDER,
 	SceneDurations,
 	WIDTH,
-	sceneDelay,
+	sceneDuration,
 	sceneFallbackClips,
-	sceneTail,
 	totalFrames,
 } from './data/scenes';
 
@@ -69,13 +68,10 @@ const calculateMetadata: CalculateMetadataFunction<LifeRoleVideoProps> = async (
 	// シーンごとの音声があれば「開始前の間 + 音声の長さ + 終了後の余裕」にシーンの長さを自動調整
 	const durations: SceneDurations = {...DEFAULT_DURATIONS};
 	for (const key of SCENE_ORDER) {
-		if (sceneNarration[key]) {
-			const len = await audioLength(sceneNarrationPath(key));
-			if (len) {
-				durations[key] = Math.ceil((sceneDelay(key) + len + sceneTail(key)) * FPS) / FPS;
-			}
-		}
+		const len = sceneNarration[key] ? await audioLength(sceneNarrationPath(key)) : null;
+		durations[key] = sceneDuration(key, len);
 	}
+
 
 	// 1本のナレーションが動画より長い場合は、最後のシーンを伸ばして切れないようにする
 	if (narration) {

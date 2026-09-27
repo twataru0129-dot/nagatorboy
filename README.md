@@ -18,7 +18,7 @@ npm run render     # out/life-role-video.mp4
 
 ## シーン構成
 
-ナレーション音声（`public/audio/scenes/*.wav`）の長さに合わせて、全体は約3分40秒です。
+ナレーション音声（`public/audio/scenes/*.wav`）の長さに合わせて、全体は約3分50秒です。
 
 | # | シーン | 時間 | 内容 |
 | --- | --- | --- | --- |
@@ -121,14 +121,16 @@ scripts/
 
 ## まとめ（ending）のナレーションについて
 
-まとめの原稿を「先生に聞く」「7つの仕事をもう一度」を含む内容に変えました（`npm run narration` で確認）。
+- `public/audio/scenes/ending.wav` が新しいまとめの音声です（「先生に聞く」「7つの仕事をもう一度」を含む）。
+  `ending.beats` の秒数は、この音声の文の区切りに合わせてあります。
+- `public/audio/scenes/ending-parts/` は、`ending.wav` がない時だけ使う予備です。
+- 前の録音は `public/audio/archive/ending-v1.wav` に残してあります。
 
-- 新しい `public/audio/scenes/ending.wav` を TTS で作って置くと、それが使われます。
-  そのあと、音声を聞きながら `src/data/scenes.ts` の `ending.beats` の秒数を合わせてください。
-- 新しい音声がない間は、前の録音から原稿と同じ2文
-  （「生活係は…大切な係です。」「みんなで協力して…しよう！」）だけを
-  `public/audio/scenes/ending-parts/` から再生します。途中の文は無音で、画面の文字で確認できます。
-- 前の `ending.wav` は `public/audio/archive/ending-v1.wav` に残してあります。
+## 読む時間の確保（holdAfter）
+
+`scenes.ts` の `holdAfter` で、「ある beat のあと最低何秒は画面を見せるか」を指定できます。
+長瀞げんきプラザのシーンでは、7つの仕事カードがすべて出た後（`allShown`）に約8秒の確認時間をとっています。
+音声の長さが変わっても、この時間は自動で確保されます。
 
 ## GitHub Pages 用の preview.mp4 を作り直す
 
