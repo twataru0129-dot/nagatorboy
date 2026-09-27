@@ -1,11 +1,11 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
-import {appear, pop} from '../components/anim';
+import {appear, overshoot} from '../components/anim';
 import {useBeats} from '../components/Contexts';
 import {SafeImg} from '../components/SafeImg';
 import {SceneFrame} from '../components/SceneFrame';
 import {NumberCircle} from '../components/SceneHeader';
-import {TeacherCharacter} from '../components/TeacherCharacter';
+import {Sparkle, TeacherCharacter} from '../components/TeacherCharacter';
 import {COLORS, DAY_COLORS} from '../theme';
 
 // SCENE 2 長瀞げんきプラザ：生活係の仕事は7つ！
@@ -24,9 +24,18 @@ export const FacilityScene: React.FC = () => {
 	const frame = useCurrentFrame();
 	const b = useBeats();
 	const zoom = interpolate(frame, [0, 180], [1.0, 1.08], {extrapolateRight: 'clamp'});
+	// 「7つ！」をぐっと大きく（行き過ぎて戻る）
+	const sevenScale = overshoot(frame, b('jobs', 0.15), 16, 0.35);
+	const sevenGlow = interpolate(frame - b('jobs'), [0, 10, 40], [0, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 
 	return (
-		<SceneFrame background={<PlazaBackground zoom={zoom} />}>
+		<SceneFrame
+			background={<PlazaBackground zoom={zoom} />}
+			camera={[
+				{at: b('jobs', 0.3), zoom: 1.06, x: 500, y: 180, ease: 10},
+				{at: b('jobs', 1.2), zoom: 1, x: 500, y: 180, ease: 16},
+			]}
+		>
 			{/* 見出し：「長瀞げんきプラザで」→「生活係の仕事は7つ！」 */}
 			<div
 				style={{
@@ -44,7 +53,19 @@ export const FacilityScene: React.FC = () => {
 				<div style={{fontSize: 64, fontWeight: 700, color: COLORS.blue, whiteSpace: 'nowrap'}}>長瀞げんきプラザ</div>
 				{frame >= b('jobs') ? (
 					<div style={{fontSize: 104, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap', ...appear(frame, b('jobs'), 20)}}>
-						生活係の仕事は<span style={{color: COLORS.orange, fontSize: 140}}>7つ</span>！
+						生活係の仕事は
+						<span
+							style={{
+								display: 'inline-block',
+								color: COLORS.orange,
+								fontSize: 150,
+								transform: `scale(${sevenScale}) rotate(${(1 - Math.min(1, sevenScale)) * 20}deg)`,
+								textShadow: `0 0 ${24 * sevenGlow}px rgba(255,138,31,0.7)`,
+							}}
+						>
+							7つ
+						</span>
+						！
 					</div>
 				) : null}
 			</div>
@@ -90,7 +111,7 @@ export const FacilityScene: React.FC = () => {
 				}}
 			>
 				{JOBS.map((job, i) => {
-					const p = pop(frame, b('jobs', 0.5) + i * 7);
+					const p = overshoot(frame, b('jobs', 0.6) + i * 7, 14, 0.14);
 					const c = DAY_COLORS[job.day];
 					return (
 						<div
@@ -104,8 +125,8 @@ export const FacilityScene: React.FC = () => {
 								padding: '12px 22px',
 								border: `5px solid ${c.main}`,
 								boxShadow: `0 6px 16px ${COLORS.shadow}`,
-								opacity: Math.min(1, p * 1.5),
-								transform: `scale(${0.7 + 0.3 * p})`,
+								opacity: Math.min(1, p * 2),
+								transform: `translateY(${(1 - Math.min(1, p)) * 40}px) scale(${0.7 + 0.3 * p})`,
 							}}
 						>
 							<NumberCircle n={i + 1} color={c.main} size={70} />
@@ -115,7 +136,22 @@ export const FacilityScene: React.FC = () => {
 				})}
 			</div>
 
-			<TeacherCharacter height={820} motion="nod" motionStart={b('jobs')} style={{right: 70, bottom: -20}} />
+			<TeacherCharacter
+				height={820}
+				expression="smile"
+				cues={[
+					{at: b('place'), pose: 'point', pointDir: 'left'},
+					{at: b('role'), pose: 'explain', expression: 'smile'},
+					{at: b('comfort'), expression: 'gentle'},
+					{at: b('jobs'), pose: 'point', pointDir: 'left', expression: 'happy'},
+					{at: b('jobs', 1.0), pose: 'explain'},
+				]}
+				nods={[b('comfort', 0.6)]}
+				style={{right: 70, bottom: -20}}
+			/>
+			{frame >= b('jobs') ? (
+				<Sparkle x={1400} y={120} size={40} scale={overshoot(frame, b('jobs', 0.2), 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 5))} />
+			) : null}
 		</SceneFrame>
 	);
 };

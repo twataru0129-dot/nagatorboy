@@ -1,7 +1,8 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear, pop} from '../components/anim';
+import {appear, bounceIn, overshoot} from '../components/anim';
 import {ArrowFlow} from '../components/ArrowFlow';
+import {punchIn} from '../components/Camera';
 import {useBeats} from '../components/Contexts';
 import {CheckMark, PersonIcon, SearchIcon} from '../components/Icons';
 import {SceneFrame} from '../components/SceneFrame';
@@ -26,11 +27,22 @@ export const ReportScene: React.FC = () => {
 	const walkP = interpolate(frame, [walk, walk + 80], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	const studentX = 120 + (1 - (1 - walkP) ** 2) * 640;
 	const stepBob = walkP > 0 && walkP < 1 ? Math.abs(Math.sin(frame / 3)) * -16 : 0;
-	const okIn = pop(frame, ok, 10);
+	const okIn = interpolate(frame - ok, [0, 6, 10, 14], [2.0, 0.92, 1.05, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	// 先生のところに着いたら「ぴょん」
+	const arrive = walk + 80;
+	const arriveHop = frame >= arrive && frame < arrive + 12 ? -Math.sin(((frame - arrive) / 12) * Math.PI) * 22 : 0;
 
 	return (
-		<SceneFrame>
-			<SceneHeader day={2} title="最後に 担任の先生へ報告" />
+		<SceneFrame
+			hud={<SceneHeader day={2} title="最後に 担任の先生へ報告" />}
+			camera={[
+				// 生活係の報告に少し寄る → 戻る
+				{at: bubble + 6, zoom: 1.06, x: 620, y: 620, ease: 14},
+				{at: b('inspect', -0.3), zoom: 1, x: 620, y: 620, ease: 18},
+				// OK！で一瞬寄る
+				...punchIn(ok, 1160, 600, 1.1, 26),
+			]}
+		>
 
 			{/* 報告 → 確認 → OK の流れ */}
 			<ArrowFlow
@@ -51,7 +63,7 @@ export const ReportScene: React.FC = () => {
 			/>
 
 			{/* 生活係（生徒のピクトグラム） */}
-			<div style={{position: 'absolute', left: studentX, top: 690 + stepBob, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+			<div style={{position: 'absolute', left: studentX, top: 690 + stepBob + arriveHop, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 				<PersonIcon size={300} color={COLORS.green} />
 				<div
 					style={{
@@ -76,7 +88,7 @@ export const ReportScene: React.FC = () => {
 						position: 'absolute',
 						left: 330,
 						top: 380,
-						transform: `scale(${pop(frame, bubble)})`,
+						transform: `scale(${overshoot(frame, bubble, 14, 0.16)})`,
 						transformOrigin: '20% 100%',
 					}}
 				>
@@ -89,7 +101,19 @@ export const ReportScene: React.FC = () => {
 			) : null}
 
 			{/* 担任の先生（説明役の人物） */}
-			<TeacherCharacter height={720} motion="nod" motionStart={ok} style={{right: 180, bottom: -20}} />
+			<TeacherCharacter
+				height={720}
+				expression="smile"
+				cues={[
+					{at: walk, pose: 'explain'},
+					{at: bubble, pose: 'normal', expression: 'gentle'},
+					{at: inspect, pose: 'check', expression: 'serious'},
+					{at: b('fix'), pose: 'explain', expression: 'smile'},
+					{at: ok, pose: 'thumbsUp', expression: 'happy'},
+				]}
+				nods={[b('bubble', 1.2), b('fix', 0.6)]}
+				style={{right: 180, bottom: -20}}
+			/>
 			<div
 				style={{
 					position: 'absolute',
@@ -163,7 +187,8 @@ export const ReportScene: React.FC = () => {
 						flexDirection: 'column',
 						alignItems: 'center',
 						justifyContent: 'center',
-						transform: `scale(${okIn}) rotate(${(1 - okIn) * -20}deg)`,
+						opacity: Math.min(1, (frame - ok + 1) / 4),
+						transform: `scale(${okIn}) rotate(${(1 - Math.min(1, okIn)) * -12}deg)`,
 					}}
 				>
 					<CheckMark size={220} />
@@ -185,7 +210,7 @@ export const ReportScene: React.FC = () => {
 						borderRadius: 30,
 						padding: '16px 50px',
 						boxShadow: `0 12px 30px rgba(23,163,90,0.4)`,
-						transform: `scale(${pop(frame, complete)})`,
+						...bounceIn(frame, complete),
 						transformOrigin: 'left center',
 						whiteSpace: 'nowrap',
 					}}

@@ -7,6 +7,7 @@ import {useBeats} from '../components/Contexts';
 import {CardIcon, CardsStackIcon, PersonIcon, ThermometerIcon} from '../components/Icons';
 import {SceneFrame} from '../components/SceneFrame';
 import {SceneHeader} from '../components/SceneHeader';
+import {TeacherCharacter} from '../components/TeacherCharacter';
 import {COLORS} from '../theme';
 
 // SCENE 6 21:50ごろ ④健康チェックカード（4ステップ）
@@ -77,7 +78,7 @@ export const HealthScene: React.FC = () => {
 				style={{position: 'absolute', left: 20, right: 20, top: 350}}
 				color={COLORS.blue}
 				cardWidth={320}
-				cardHeight={560}
+				cardHeight={470}
 				fontSize={38}
 				arrowSize={56}
 				gap={6}
@@ -130,6 +131,18 @@ export const HealthScene: React.FC = () => {
 						at: b('step5'),
 					},
 				]}
+			/>
+
+			{/* 先生（顔アップ・まじめに確認） */}
+			<TeacherCharacter
+				height={250}
+				shot="close"
+				expression="serious"
+				pose="check"
+				cues={[{at: b('step5', 0.6), expression: 'smile'}]}
+				nods={[b('step1'), b('step2'), b('step3', 1.0), b('step4'), b('step5')]}
+				calm
+				style={{right: 40, bottom: 0}}
 			/>
 		</SceneFrame>
 	);

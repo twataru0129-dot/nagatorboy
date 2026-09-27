@@ -1,7 +1,8 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+import {interpolate, useCurrentFrame} from 'remotion';
 import {COLORS} from '../theme';
-import {appear, pop, progress} from './anim';
+import {pop, progress, slideIn} from './anim';
+import {Sparkle} from './TeacherCharacter';
 import {CheckMark} from './Icons';
 import {Sfx} from './Sfx';
 
@@ -35,7 +36,8 @@ export const CheckItem: React.FC<{
 				padding: `${fontSize * 0.18}px ${fontSize * 0.5}px ${fontSize * 0.18}px ${fontSize * 0.25}px`,
 				boxShadow: `0 4px 14px ${COLORS.shadow}`,
 				border: `4px solid ${checked ? COLORS.green : '#DCE6F5'}`,
-				...appear(frame, appearAt, 30),
+				...slideIn(frame, appearAt, 'left', 60),
+				position: 'relative',
 				...style,
 			}}
 		>
@@ -58,6 +60,15 @@ export const CheckItem: React.FC<{
 			{icon}
 			<div style={{fontSize, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>{label}</div>
 			{sound && checkAt !== undefined ? <Sfx name="check" at={checkAt} /> : null}
+			{/* チェックの瞬間の「キラッ」 */}
+			{checkAt !== undefined && frame >= checkAt && frame < checkAt + 24 ? (
+				<Sparkle
+					x={box * 1.05}
+					y={fontSize * 0.1}
+					size={fontSize * 0.35}
+					scale={interpolate(frame - checkAt, [0, 6, 24], [0, 1.2, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}
+				/>
+			) : null}
 		</div>
 	);
 };

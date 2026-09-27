@@ -18,7 +18,7 @@ npm run render     # out/life-role-video.mp4
 
 ## シーン構成
 
-ナレーション音声（`public/audio/scenes/*.wav`）の長さに合わせて、全体は約3分20秒です。
+ナレーション音声（`public/audio/scenes/*.wav`）の長さに合わせて、全体は約3分40秒です。
 
 | # | シーン | 時間 | 内容 |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ npm run render     # out/life-role-video.mp4
 | 8 | returnLinen | 2:03〜2:21 | ⑥リネンを回収して返す |
 | 9 | roomCheck | 2:21〜2:41 | ⑦部屋の自主点検 |
 | 10 | report | 2:41〜3:03 | 担任へ報告 → OK！ → 完了 |
-| 11 | ending | 3:03〜3:20 | まとめ |
+| 11 | ending | 3:03〜3:38 | まとめ → 7つの仕事をもう一度 → 先生アップで締め |
 
 1日目は **青**、2日目は **緑** で色分けしています。
 
@@ -90,3 +90,51 @@ scripts/
   generate-sfx.mjs       … 効果音の生成
   print-narration.mjs    … ナレーション原稿の表示
 ```
+
+## 人物（TeacherCharacter）の表情・ポーズ・寄り
+
+`teacher.png` の絵は描き直さず、次の方法で表情やポーズを表現しています。
+
+- **expression**（表情）…「漫符」と体の動きで表現
+  `smile`（キラッ）/ `happy`（キラキラ＋ぴょこっ）/ `serious`（眼鏡がキラッ）/
+  `thinking`（？＋首かしげ）/ `surprised`（！＋びくっ）/ `gentle`（♪＋ゆったり）/ `neutral`
+- **pose**（ポーズ）… 傾き・ゆれと手元の小物で表現
+  `wave`（手を振る）/ `point`（指差し矢印）/ `explain`（説明の身ぶり）/
+  `check`（チェック表）/ `thumbsUp`（グッ！＋キラッ）/ `normal`
+- **shot**（寄り）… `full`（全身）/ `waist`（上半身）/ `close`（顔アップ）
+- `cues` で「何フレーム目から切り替えるか」を並べます。`nods` でうなずき、`bounceAt` で着地の「ぽよん」。
+
+```tsx
+<TeacherCharacter
+  height={700}
+  expression="smile"
+  cues={[
+    {at: b('set'), pose: 'explain'},
+    {at: b('count'), pose: 'check', expression: 'serious'},
+    {at: b('enough'), pose: 'normal', expression: 'happy'},
+  ]}
+  nods={[b('sheets', 0.3)]}
+/>
+```
+
+カメラ（寄り・戻り）は `SceneFrame` の `camera` に、見出しや時計は `hud` に渡します（`src/components/Camera.tsx`）。
+
+## まとめ（ending）のナレーションについて
+
+まとめの原稿を「先生に聞く」「7つの仕事をもう一度」を含む内容に変えました（`npm run narration` で確認）。
+
+- 新しい `public/audio/scenes/ending.wav` を TTS で作って置くと、それが使われます。
+  そのあと、音声を聞きながら `src/data/scenes.ts` の `ending.beats` の秒数を合わせてください。
+- 新しい音声がない間は、前の録音から原稿と同じ2文
+  （「生活係は…大切な係です。」「みんなで協力して…しよう！」）だけを
+  `public/audio/scenes/ending-parts/` から再生します。途中の文は無音で、画面の文字で確認できます。
+- 前の `ending.wav` は `public/audio/archive/ending-v1.wav` に残してあります。
+
+## GitHub Pages 用の preview.mp4 を作り直す
+
+```bash
+npm run preview
+```
+
+`preview.mp4`（1280×720・30fps・H.264＋AAC）と `poster.jpg` が更新されます。
+コミットして `main` に取り込むと、GitHub Pages のページに反映されます。

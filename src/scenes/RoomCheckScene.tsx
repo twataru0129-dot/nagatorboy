@@ -1,6 +1,6 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear, pop} from '../components/anim';
+import {appear, overshoot, stampIn} from '../components/anim';
 import {CheckItem} from '../components/CheckItem';
 import {useBeats} from '../components/Contexts';
 import {CheckMark, CardIcon} from '../components/Icons';
@@ -8,6 +8,7 @@ import {ImagePlaceholder, SafeImg} from '../components/SafeImg';
 import {SceneFrame} from '../components/SceneFrame';
 import {SceneHeader} from '../components/SceneHeader';
 import {Sfx} from '../components/Sfx';
+import {TeacherCharacter} from '../components/TeacherCharacter';
 import {COLORS} from '../theme';
 
 // SCENE 9 2日目 ⑦部屋の自主点検
@@ -38,12 +39,15 @@ export const RoomCheckScene: React.FC = () => {
 		b('rest', 1.3),
 	];
 	const all = b('allDone');
-	const allIn = pop(frame, all, 11);
 	const listStart = appearAt[0];
 
 	return (
-		<SceneFrame>
-			<SceneHeader day={2} number={7} title="部屋の自主点検" />
+		<SceneFrame
+			hud={<SceneHeader day={2} number={7} title="部屋の自主点検" />}
+			camera={[
+				{at: all + 4, zoom: 1.07, x: 1100, y: 880, ease: 12},
+			]}
+		>
 
 			{/* 「部屋の片付けが終わったら、生活係が最後の確認をします」 */}
 			{frame < listStart ? (
@@ -87,16 +91,16 @@ export const RoomCheckScene: React.FC = () => {
 			<div
 				style={{
 					position: 'absolute',
-					left: 860,
+					left: 820,
 					top: 235,
-					width: 980,
-					height: 700,
+					width: 560,
+					height: 600,
 					borderRadius: 30,
 					overflow: 'hidden',
 					border: '8px solid #fff',
 					boxShadow: `0 12px 30px ${COLORS.shadow}`,
 					background: '#fff',
-					opacity: Math.min(1, pop(frame, b('sheet')) * 1.5),
+					opacity: Math.min(1, overshoot(frame, b('sheet'), 14, 0.1) * 1.5),
 				}}
 			>
 				<SafeImg
@@ -117,27 +121,40 @@ export const RoomCheckScene: React.FC = () => {
 				<div
 					style={{
 						position: 'absolute',
-						left: 1130,
-						top: 800,
+						left: 800,
+						top: 860,
 						display: 'flex',
 						alignItems: 'center',
 						gap: 10,
 						background: COLORS.green,
 						color: '#fff',
-						fontSize: 80,
+						fontSize: 68,
 						fontWeight: 700,
 						borderRadius: 999,
-						padding: '14px 50px 14px 24px',
+						padding: '12px 44px 12px 20px',
 						boxShadow: `0 12px 30px rgba(23,163,90,0.4)`,
-						transform: `scale(${allIn})`,
+						...stampIn(frame, all),
 						whiteSpace: 'nowrap',
 					}}
 				>
-					<CheckMark size={100} color="#fff" />
+					<CheckMark size={86} color="#fff" />
 					最終確認 OK！
 				</div>
 			) : null}
 			<Sfx name="check" at={all} />
+
+			<TeacherCharacter
+				height={620}
+				shot="waist"
+				expression="smile"
+				cues={[
+					{at: b('sheet'), pose: 'explain'},
+					{at: b('last'), pose: 'check', expression: 'serious'},
+					{at: all, pose: 'thumbsUp', expression: 'happy'},
+				]}
+				nods={checkAt.slice(0, 3)}
+				style={{right: 20, bottom: 0}}
+			/>
 		</SceneFrame>
 	);
 };

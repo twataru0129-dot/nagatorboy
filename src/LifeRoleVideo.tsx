@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Html5Audio, Sequence, staticFile} from 'remotion';
 import {AssetContext, SceneTimingProvider} from './components/Contexts';
 import {AUDIO, Availability, VOLUME, sceneNarrationPath} from './data/assets';
-import {FPS, SceneDurations, SceneKey, buildTimeline, sceneDelay} from './data/scenes';
+import {FPS, SceneDurations, SceneKey, buildTimeline, sceneDelay, sceneFallbackClips} from './data/scenes';
 import {loadFonts} from './fonts';
 import {BathScene} from './scenes/BathScene';
 import {BedScene} from './scenes/BedScene';
@@ -57,6 +57,21 @@ export const LifeRoleVideo: React.FC<LifeRoleVideoProps> = ({assets, durations})
 									<Html5Audio src={staticFile(sceneNarrationPath(key))} volume={VOLUME.narration} />
 								</Sequence>
 							) : null}
+							{/* <シーン名>.wav がない時は、仮のナレーション部品を並べる */}
+							{!hasSceneAudio
+								? sceneFallbackClips(key)
+										.filter((clip) => assets.fallbackClips?.[clip.file])
+										.map((clip) => (
+											<Sequence
+												key={clip.file}
+												from={Math.round((sceneDelay(key) + clip.at) * FPS)}
+												layout="none"
+												name={`仮ナレーション ${clip.file}`}
+											>
+												<Html5Audio src={staticFile(clip.file)} volume={VOLUME.narration} />
+											</Sequence>
+										))
+								: null}
 						</Sequence>
 					);
 				})}

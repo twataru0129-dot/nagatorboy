@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
-import {pop, progress} from '../components/anim';
+import {bounceIn, overshoot, progress} from '../components/anim';
+import {punchIn} from '../components/Camera';
 import {SafeImg} from '../components/SafeImg';
 import {ArrowFlow} from '../components/ArrowFlow';
 import {Clock} from '../components/Clock';
@@ -21,13 +22,16 @@ export const MorningScene: React.FC = () => {
 	const gag = b('gag');
 	const alarm = b('alarm');
 	const wry = b('wry');
-	const gagIn = pop(frame, gag);
+	const gagIn = overshoot(frame, gag, 14, 0.16);
 	// 目覚まし時計がブルブル震える
 	const shake = frame >= alarm && frame < alarm + 40 ? Math.sin(frame * 2.2) * 8 : 0;
 
 	return (
-		<SceneFrame background={<MorningRoom frame={frame} />}>
-			<SceneHeader day={2} number={5} title="荷物・布団整理の声かけ" time={<Clock time="6:00" day={2} start={4} />} />
+		<SceneFrame
+			background={<MorningRoom frame={frame} />}
+			hud={<SceneHeader day={2} number={5} title="荷物・布団整理の声かけ" time={<Clock time="6:00" day={2} start={4} />} />}
+			camera={[...punchIn(alarm, 250, 780, 1.12, 26)]}
+		>
 
 			<ArrowFlow
 				style={{position: 'absolute', left: 40, top: 250}}
@@ -93,7 +97,7 @@ export const MorningScene: React.FC = () => {
 						borderRadius: 999,
 						padding: '16px 56px 16px 30px',
 						boxShadow: `0 10px 26px ${COLORS.shadow}`,
-						transform: `scale(${pop(frame, b('callAgain'))})`,
+						...bounceIn(frame, b('callAgain')),
 						whiteSpace: 'nowrap',
 					}}
 				>
@@ -132,8 +136,14 @@ export const MorningScene: React.FC = () => {
 
 			<TeacherCharacter
 				height={470}
-				motion="nod"
-				motionStart={wry}
+				expression="gentle"
+				cues={[
+					{at: b('call'), pose: 'explain'},
+					{at: b('callAgain'), pose: 'wave', expression: 'happy'},
+					{at: alarm, pose: 'normal', expression: 'surprised'},
+					{at: wry, expression: 'gentle'},
+				]}
+				nods={[b('start', 0.3)]}
 				sweat={progress(frame, wry, 10)}
 				style={{right: 50, bottom: -15}}
 			/>

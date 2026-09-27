@@ -1,6 +1,6 @@
 import React from 'react';
 import {useCurrentFrame} from 'remotion';
-import {appear, pop} from '../components/anim';
+import {appear, bounceIn, emphasize, overshoot, stampIn} from '../components/anim';
 import {ArrowFlow} from '../components/ArrowFlow';
 import {Clock} from '../components/Clock';
 import {useBeats} from '../components/Contexts';
@@ -20,8 +20,13 @@ export const LinenScene: React.FC = () => {
 	const enough = b('enough');
 
 	return (
-		<SceneFrame>
-			<SceneHeader day={1} number={1} title="リネンを配る" time={<Clock time="17:00" day={1} start={4} />} />
+		<SceneFrame
+			hud={<SceneHeader day={1} number={1} title="リネンを配る" time={<Clock time="17:00" day={1} start={4} />} />}
+			camera={[
+				{at: b('set', 0.4), zoom: 1.07, x: 1075, y: 440, ease: 16},
+				{at: b('flow', -0.8), zoom: 1, x: 1075, y: 440, ease: 16},
+			]}
+		>
 
 			{/* リネン置き場の写真 */}
 			<div
@@ -129,7 +134,7 @@ export const LinenScene: React.FC = () => {
 						borderRadius: 999,
 						padding: '10px 34px',
 						boxShadow: `0 6px 16px ${COLORS.shadow}`,
-						transform: `scale(${pop(frame, b('count'))})`,
+						...stampIn(frame, b('count')),
 						whiteSpace: 'nowrap',
 					}}
 				>
@@ -150,7 +155,7 @@ export const LinenScene: React.FC = () => {
 						borderRadius: 999,
 						padding: '10px 34px',
 						boxShadow: `0 6px 16px ${COLORS.shadow}`,
-						transform: `scale(${pop(frame, enough)})`,
+						...bounceIn(frame, enough),
 						whiteSpace: 'nowrap',
 					}}
 				>
@@ -158,7 +163,19 @@ export const LinenScene: React.FC = () => {
 				</div>
 			) : null}
 
-			<TeacherCharacter height={700} motion="nod" motionStart={b('set')} style={{right: 40, bottom: -20}} />
+			<TeacherCharacter
+				height={700}
+				expression="smile"
+				cues={[
+					{at: b('rack'), pose: 'point', pointDir: 'left'},
+					{at: set, pose: 'explain'},
+					{at: b('flow', -0.6), pose: 'point', pointDir: 'left'},
+					{at: b('count'), pose: 'check', expression: 'serious'},
+					{at: enough, pose: 'normal', expression: 'happy'},
+				]}
+				nods={[b('sheets', 0.3), b('pillow', 0.3)]}
+				style={{right: 40, bottom: -20}}
+			/>
 		</SceneFrame>
 	);
 };
@@ -171,14 +188,14 @@ const LinenCount: React.FC<{icon: React.ReactNode; copies: number; label: string
 	start,
 }) => {
 	const frame = useCurrentFrame();
-	const p = pop(frame, start);
+	const p = overshoot(frame, start, 16, 0.18);
 	return (
 		<div
 			style={{
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'center',
-				opacity: Math.min(1, p * 1.5),
+				opacity: Math.min(1, p * 2),
 				transform: `scale(${0.7 + 0.3 * p})`,
 			}}
 		>
@@ -191,7 +208,7 @@ const LinenCount: React.FC<{icon: React.ReactNode; copies: number; label: string
 			</div>
 			<div style={{display: 'flex', alignItems: 'baseline', gap: 14, whiteSpace: 'nowrap'}}>
 				<span style={{fontSize: 50, fontWeight: 700, color: COLORS.text}}>{label}</span>
-				<span style={{fontSize: 76, fontWeight: 700, color: COLORS.orange}}>{count}</span>
+				<span style={{display: 'inline-block', fontSize: 76, fontWeight: 700, color: COLORS.orange, transform: `scale(${emphasize(frame, start + 10)})`}}>{count}</span>
 			</div>
 		</div>
 	);

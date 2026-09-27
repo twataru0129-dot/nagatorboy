@@ -10,7 +10,8 @@
     "still": "remotion still LifeRoleVideo out/still.png",
     "typecheck": "tsc --noEmit",
     "sfx": "node scripts/generate-sfx.mjs",
-    "narration": "node scripts/print-narration.mjs"
+    "narration": "node scripts/print-narration.mjs",
+    "preview": "bash scripts/make-preview.sh"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.529",
