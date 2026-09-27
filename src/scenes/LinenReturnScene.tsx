@@ -1,5 +1,5 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+import {interpolate, useCurrentFrame} from 'remotion';
 import {appear, pop} from '../components/anim';
 import {ArrowFlow} from '../components/ArrowFlow';
 import {useBeats} from '../components/Contexts';
@@ -20,6 +20,33 @@ export const LinenReturnScene: React.FC = () => {
 	return (
 		<SceneFrame>
 			<SceneHeader day={2} number={6} title="リネンを回収して返す" />
+
+			{/* 「使ったリネンを回収します」 */}
+			{frame < b('step1') ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 60,
+						top: 300,
+						display: 'flex',
+						alignItems: 'center',
+						gap: 30,
+						background: '#fff',
+						borderRadius: 40,
+						padding: '30px 60px',
+						border: `6px solid ${COLORS.green}`,
+						boxShadow: `0 10px 30px ${COLORS.shadow}`,
+						opacity: interpolate(frame, [b('step1', -0.3), b('step1')], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+						...appear(frame, b('used'), 40, 18),
+					}}
+				>
+					<SheetIcon size={180} />
+					<PillowIcon size={180} />
+					<div style={{fontSize: 84, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>
+						使ったリネンを<span style={{color: COLORS.green}}>回収</span>
+					</div>
+				</div>
+			) : null}
 
 			<ArrowFlow
 				style={{position: 'absolute', left: 40, top: 240}}

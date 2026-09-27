@@ -27,7 +27,7 @@ export const FacilityScene: React.FC = () => {
 
 	return (
 		<SceneFrame background={<PlazaBackground zoom={zoom} />}>
-			{/* 見出し */}
+			{/* 見出し：「長瀞げんきプラザで」→「生活係の仕事は7つ！」 */}
 			<div
 				style={{
 					position: 'absolute',
@@ -38,14 +38,44 @@ export const FacilityScene: React.FC = () => {
 					padding: '26px 56px',
 					boxShadow: `0 10px 30px ${COLORS.shadow}`,
 					borderBottom: `10px solid ${COLORS.blue}`,
-					...appear(frame, b('title'), 40, 18),
+					...appear(frame, b('place'), 40, 18),
 				}}
 			>
-				<div style={{fontSize: 52, fontWeight: 700, color: COLORS.subText}}>長瀞げんきプラザで</div>
-				<div style={{fontSize: 104, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>
-					生活係の仕事は<span style={{color: COLORS.orange, fontSize: 140}}>7つ</span>！
-				</div>
+				<div style={{fontSize: 64, fontWeight: 700, color: COLORS.blue, whiteSpace: 'nowrap'}}>長瀞げんきプラザ</div>
+				{frame >= b('jobs') ? (
+					<div style={{fontSize: 104, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap', ...appear(frame, b('jobs'), 20)}}>
+						生活係の仕事は<span style={{color: COLORS.orange, fontSize: 140}}>7つ</span>！
+					</div>
+				) : null}
 			</div>
+
+			{/* 「生活係は、みんなが気持ちよく過ごせるように動きます」 */}
+			{frame < b('jobs') ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 80,
+						top: 330,
+						background: 'rgba(255,255,255,0.96)',
+						borderRadius: 36,
+						padding: '30px 56px',
+						boxShadow: `0 10px 30px ${COLORS.shadow}`,
+						border: `6px solid ${COLORS.green}`,
+						lineHeight: 1.35,
+						opacity: interpolate(frame, [b('jobs') - 8, b('jobs')], [1, 0], {extrapolateLeft: 'clamp'}),
+						...appear(frame, b('role'), 40, 18),
+					}}
+				>
+					<div style={{fontSize: 72, fontWeight: 700, color: COLORS.text}}>生活係は</div>
+					{frame >= b('comfort') ? (
+						<div style={{fontSize: 72, fontWeight: 700, color: COLORS.green, ...appear(frame, b('comfort'), 20)}}>
+							みんなが気持ちよく
+							<br />
+							過ごせるように動く！
+						</div>
+					) : null}
+				</div>
+			) : null}
 
 			{/* 7つの仕事（1日目＝青、2日目＝緑） */}
 			<div
@@ -60,7 +90,7 @@ export const FacilityScene: React.FC = () => {
 				}}
 			>
 				{JOBS.map((job, i) => {
-					const p = pop(frame, b('jobs') + i * 6);
+					const p = pop(frame, b('jobs', 0.5) + i * 7);
 					const c = DAY_COLORS[job.day];
 					return (
 						<div

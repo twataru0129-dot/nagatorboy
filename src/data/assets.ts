@@ -34,7 +34,7 @@ export const sceneNarrationPath = (key: string) => `audio/scenes/${key}.wav`;
 export const VOLUME = {
 	narration: 1,
 	/** 効果音は小さめ（TTS の邪魔をしない） */
-	sfx: 0.18,
+	sfx: 0.12,
 	/** BGM はさらに小さく */
 	bgm: 0.06,
 };

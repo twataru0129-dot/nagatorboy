@@ -17,6 +17,7 @@ export const LinenScene: React.FC = () => {
 	const frame = useCurrentFrame();
 	const b = useBeats();
 	const set = b('set');
+	const enough = b('enough');
 
 	return (
 		<SceneFrame>
@@ -34,7 +35,7 @@ export const LinenScene: React.FC = () => {
 					overflow: 'hidden',
 					boxShadow: `0 10px 26px ${COLORS.shadow}`,
 					border: '8px solid #fff',
-					...appear(frame, 8, 40, 18),
+					...appear(frame, b('rack'), 40, 18),
 				}}
 			>
 				<SafeImg
@@ -95,8 +96,8 @@ export const LinenScene: React.FC = () => {
 					1人1セット
 				</div>
 				<div style={{display: 'flex', justifyContent: 'center', gap: 40, marginTop: 22}}>
-					<LinenCount icon={<SheetIcon size={120} />} copies={2} label="シーツ" count="2枚" start={set + 10} />
-					<LinenCount icon={<PillowIcon size={120} />} copies={1} label="枕カバー" count="1枚" start={set + 22} />
+					<LinenCount icon={<SheetIcon size={120} />} copies={2} label="シーツ" count="2枚" start={b('sheets')} />
+					<LinenCount icon={<PillowIcon size={120} />} copies={1} label="枕カバー" count="1枚" start={b('pillow')} />
 				</div>
 			</div>
 
@@ -110,8 +111,8 @@ export const LinenScene: React.FC = () => {
 				arrowSize={120}
 				gap={30}
 				steps={[
-					{label: 'リネン置き場', icon: <RackIcon size={110} />, at: b('flow')},
-					{label: '担当する部屋', icon: <DoorIcon size={110} />, at: b('flow', 1)},
+					{label: 'リネン置き場', icon: <RackIcon size={110} />, at: b('flow', -0.6)},
+					{label: '担当する部屋', icon: <DoorIcon size={110} />, at: b('flow')},
 				]}
 			/>
 
@@ -119,7 +120,7 @@ export const LinenScene: React.FC = () => {
 				<div
 					style={{
 						position: 'absolute',
-						left: 1130,
+						left: 700,
 						top: 950,
 						background: COLORS.orange,
 						color: '#fff',
@@ -136,7 +137,28 @@ export const LinenScene: React.FC = () => {
 				</div>
 			) : null}
 
-			<TeacherCharacter height={700} motion="nod" motionStart={set} style={{right: 40, bottom: -20}} />
+			{frame >= enough ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 1090,
+						top: 950,
+						background: COLORS.blue,
+						color: '#fff',
+						fontSize: 46,
+						fontWeight: 700,
+						borderRadius: 999,
+						padding: '10px 34px',
+						boxShadow: `0 6px 16px ${COLORS.shadow}`,
+						transform: `scale(${pop(frame, enough)})`,
+						whiteSpace: 'nowrap',
+					}}
+				>
+					必要な分だけ配る
+				</div>
+			) : null}
+
+			<TeacherCharacter height={700} motion="nod" motionStart={b('set')} style={{right: 40, bottom: -20}} />
 		</SceneFrame>
 	);
 };

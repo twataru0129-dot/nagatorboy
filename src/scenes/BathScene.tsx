@@ -1,5 +1,5 @@
 import React from 'react';
-import {useCurrentFrame} from 'remotion';
+import {interpolate, useCurrentFrame} from 'remotion';
 import {appear} from '../components/anim';
 import {CheckItem} from '../components/CheckItem';
 import {TimeLabel} from '../components/Clock';
@@ -22,8 +22,38 @@ export const BathScene: React.FC = () => {
 				day={1}
 				number={3}
 				title="お風呂掃除"
-				time={<TimeLabel text="入浴後" day={1} start={4} icon={<BathIcon size={100} />} />}
+				time={<TimeLabel text="入浴後" day={1} start={b('afterBath')} icon={<BathIcon size={100} />} />}
 			/>
+
+			{/* 「入浴が終わったら、お風呂掃除です」 */}
+			{frame < b('check1', -0.5) ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 140,
+						top: 330,
+						display: 'flex',
+						alignItems: 'center',
+						gap: 40,
+						background: '#fff',
+						borderRadius: 40,
+						padding: '36px 60px',
+						border: `6px solid ${COLORS.blue}`,
+						boxShadow: `0 10px 30px ${COLORS.shadow}`,
+						opacity: interpolate(frame, [b('check1', -0.8), b('check1', -0.5)], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+						...appear(frame, b('afterBath', 0.3), 40, 18),
+					}}
+				>
+					<BathIcon size={220} />
+					<div style={{fontSize: 80, fontWeight: 700, color: COLORS.text, lineHeight: 1.3}}>
+						入浴が終わったら
+						<br />
+						<span style={{color: COLORS.blue, opacity: interpolate(frame, [b('afterBath', 2.0), b('afterBath', 2.3)], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
+							お風呂掃除！
+						</span>
+					</div>
+				</div>
+			) : null}
 
 			<div style={{position: 'absolute', left: 140, top: 280, display: 'flex', flexDirection: 'column', gap: 34}}>
 				<CheckItem label="掃除" icon={<BroomIcon size={96} />} appearAt={b('check1', -0.5)} checkAt={b('check1')} fontSize={84} />
