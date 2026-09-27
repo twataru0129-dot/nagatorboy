@@ -1,15 +1,22 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {COLORS} from '../theme';
+import {Camera, CameraKey} from './Camera';
 import {useSceneDuration} from './Contexts';
 
-/** シーン共通の枠：背景＋フェードイン／フェードアウト */
+/**
+ * シーン共通の枠：背景＋フェードイン／フェードアウト
+ * camera … 仮想カメラ（背景と本体に効く）
+ * hud    … カメラの影響を受けない前面の要素（見出し・時計など）
+ */
 export const SceneFrame: React.FC<{
 	children: React.ReactNode;
 	background?: React.ReactNode;
 	fadeIn?: number;
 	fadeOut?: number;
-}> = ({children, background, fadeIn = 10, fadeOut = 10}) => {
+	camera?: CameraKey[];
+	hud?: React.ReactNode;
+}> = ({children, background, fadeIn = 10, fadeOut = 10, camera = [], hud}) => {
 	const frame = useCurrentFrame();
 	const duration = useSceneDuration();
 	const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -18,8 +25,11 @@ export const SceneFrame: React.FC<{
 	const opacity = Math.min(inOpacity, outOpacity);
 	return (
 		<AbsoluteFill style={{opacity}}>
-			{background ?? <DefaultBackground />}
-			{children}
+			<Camera keys={camera}>
+				{background ?? <DefaultBackground />}
+				{children}
+			</Camera>
+			{hud}
 		</AbsoluteFill>
 	);
 };

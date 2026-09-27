@@ -1,11 +1,12 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
-import {pop, progress} from '../components/anim';
+import {overshoot, pop, progress} from '../components/anim';
+import {punchIn} from '../components/Camera';
 import {useBeats} from '../components/Contexts';
 import {SceneFrame} from '../components/SceneFrame';
 import {Sfx} from '../components/Sfx';
 import {SpeechBubble} from '../components/SpeechBubble';
-import {TeacherCharacter} from '../components/TeacherCharacter';
+import {Sparkle, TeacherCharacter} from '../components/TeacherCharacter';
 import {COLORS} from '../theme';
 
 // SCENE 1 オープニング（ギャグあり）
@@ -46,18 +47,31 @@ export const IntroScene: React.FC = () => {
 	const jumpBottom = interpolate(jp, [0, 1], [startBottom, LAND_BOTTOM]) - Math.sin(jp * Math.PI) * 380;
 	const jumpH = interpolate(jp, [0, 1], [inBoatTeacherH, TEACHER_H]);
 	const jumpRot = Math.sin(jp * Math.PI) * -12;
-	// 着地の「ふわっ」とした沈み込み（体の形は変えない）
-	const landDip = frame >= land ? Math.sin(Math.min(1, (frame - land) / 10) * Math.PI) * 18 : 0;
+	// 着地のあと、もう一度小さく「ぴょん」とはねる
+	const rebound = frame >= land + 8 && frame < land + 24 ? -Math.sin(((frame - land - 8) / 16) * Math.PI) * 26 : 0;
 
-	const titleIn = pop(frame, b('title'));
+	const titleAt = b('title');
+	const titleIn = overshoot(frame, titleAt, 18, 0.2);
 	const point = b('point');
 	const jaan = b('jaan');
-	const gagIn = pop(frame, point + 4);
+	const gagIn = overshoot(frame, point + 4, 14, 0.18);
+	// ツッコミ感：ふきだしが出た瞬間に小さくブルッとゆれる
+	const tsukkomi = frame >= point + 4 && frame < point + 16 ? Math.sin((frame - point) * 2.4) * 3 : 0;
 	// ギャグ中はタイトルを左上に小さく
 	const titleShrink = progress(frame, point, 14);
 
 	return (
-		<SceneFrame background={<RiverBackground frame={frame} />} fadeIn={0}>
+		<SceneFrame
+			background={<RiverBackground frame={frame} />}
+			fadeIn={0}
+			camera={[
+				// 「みなさん、こんにちは！」で先生に少し寄る → タイトルで全体に戻る
+				{at: b('wave', 0.6), zoom: 1.18, x: 1480, y: 600, ease: 18},
+				{at: titleAt, zoom: 1, x: 1480, y: 600, ease: 14},
+				// オチ（「生活係の仕事の流れも…」）で一瞬寄る
+				...punchIn(jaan, 1300, 520, 1.1, 22),
+			]}
+		>
 			{/* ボート（ジャンプ前は人物が乗っている） */}
 			{frame < jump + 40 ? (
 				<Raft
@@ -77,7 +91,7 @@ export const IntroScene: React.FC = () => {
 					style={{
 						position: 'absolute',
 						left: jumpX,
-						top: jumpBottom + landDip,
+						top: jumpBottom + rebound,
 						transform: `translate(-50%, -100%) rotate(${jumpRot}deg)`,
 						transformOrigin: '50% 100%',
 					}}
@@ -85,9 +99,15 @@ export const IntroScene: React.FC = () => {
 					<div style={{position: 'relative', height: jumpH}}>
 						<TeacherCharacter
 							height={jumpH}
-							motion={frame >= point ? 'point' : frame >= b('wave') ? 'wave' : 'still'}
-							motionStart={frame >= point ? point : b('wave')}
-							waveLines
+							expression="happy"
+							bounceAt={land}
+							showPointArrow={false}
+							cues={[
+								{at: b('wave'), pose: 'wave'},
+								{at: point, pose: 'point', pointDir: 'left', expression: 'surprised'},
+								{at: jaan, expression: 'happy'},
+							]}
+							nods={[b('wave', 1.6)]}
 							style={{position: 'relative'}}
 						/>
 					</div>
@@ -104,7 +124,7 @@ export const IntroScene: React.FC = () => {
 					left: 90,
 					top: 70,
 					transformOrigin: 'top left',
-					transform: `scale(${titleIn * (1 - 0.42 * titleShrink)})`,
+					transform: `scale(${titleIn * (1 - 0.42 * titleShrink)}) rotate(${(1 - Math.min(1, titleIn)) * -6}deg)`,
 					opacity: Math.min(1, titleIn * 1.5),
 					background: 'rgba(255,255,255,0.95)',
 					borderRadius: 40,
@@ -119,6 +139,15 @@ export const IntroScene: React.FC = () => {
 				</div>
 			</div>
 
+			{/* タイトルのキラッ */}
+			{frame >= titleAt && frame < point ? (
+				<>
+					<Sparkle x={110} y={90} size={34} scale={overshoot(frame, titleAt + 6, 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 5))} />
+					<Sparkle x={820} y={120} size={44} scale={overshoot(frame, titleAt + 10, 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 6 + 2))} />
+					<Sparkle x={760} y={330} size={28} scale={overshoot(frame, titleAt + 14, 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 4 + 1))} />
+				</>
+			) : null}
+
 			{/* ギャグ：荒川を指差して */}
 			{frame >= point ? (
 				<>
@@ -128,7 +157,7 @@ export const IntroScene: React.FC = () => {
 							position: 'absolute',
 							left: 540,
 							top: 250,
-							transform: `scale(${gagIn})`,
+							transform: `scale(${gagIn}) rotate(${tsukkomi}deg)`,
 							transformOrigin: '100% 100%',
 						}}
 					>
@@ -263,7 +292,7 @@ const Raft: React.FC<{
 					}}
 				>
 					<div style={{position: 'relative', height: riderHeight}}>
-						<TeacherCharacter height={riderHeight} motion="still" style={{position: 'relative'}} />
+						<TeacherCharacter height={riderHeight} expression="neutral" calm style={{position: 'relative'}} />
 					</div>
 				</div>
 			) : null}

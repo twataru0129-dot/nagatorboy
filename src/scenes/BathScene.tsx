@@ -1,6 +1,6 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear} from '../components/anim';
+import {appear, bounceIn, emphasize} from '../components/anim';
 import {CheckItem} from '../components/CheckItem';
 import {TimeLabel} from '../components/Clock';
 import {useBeats} from '../components/Contexts';
@@ -17,13 +17,18 @@ export const BathScene: React.FC = () => {
 	const b = useBeats();
 
 	return (
-		<SceneFrame>
-			<SceneHeader
+		<SceneFrame
+			hud={<SceneHeader
 				day={1}
 				number={3}
 				title="お風呂掃除"
 				time={<TimeLabel text="入浴後" day={1} start={b('afterBath')} icon={<BathIcon size={100} />} />}
-			/>
+			/>}
+			camera={[
+				{at: b('together', 0.3), zoom: 1.07, x: 420, y: 900, ease: 14},
+				{at: b('together', 2.6), zoom: 1, x: 420, y: 900, ease: 20},
+			]}
+		>
 
 			{/* 「入浴が終わったら、お風呂掃除です」 */}
 			{frame < b('check1', -0.5) ? (
@@ -73,18 +78,34 @@ export const BathScene: React.FC = () => {
 					border: `5px solid ${COLORS.blue}`,
 					borderRadius: 999,
 					padding: '10px 40px 10px 24px',
-					...appear(frame, b('together')),
+					...bounceIn(frame, b('together')),
 				}}
 			>
+				{/* 3人が順番に「ぴょん」 */}
 				<div style={{display: 'flex'}}>
-					<PersonIcon size={70} color={COLORS.blue} />
-					<PersonIcon size={70} color={COLORS.green} style={{marginLeft: -20}} />
-					<PersonIcon size={70} color={COLORS.orange} style={{marginLeft: -20}} />
+					{[COLORS.blue, COLORS.green, COLORS.orange].map((c, i) => {
+						const t = frame - b('together', 0.3 + i * 0.15);
+						const hop = t >= 0 && t < 12 ? -Math.sin((t / 12) * Math.PI) * 16 : 0;
+						return <PersonIcon key={c} size={70} color={c} style={{marginLeft: i === 0 ? 0 : -20, transform: `translateY(${hop}px)`}} />;
+					})}
 				</div>
-				<span style={{fontSize: 52, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>担当の人で協力</span>
+				<span style={{fontSize: 52, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>
+					担当の人で<span style={{display: 'inline-block', color: COLORS.blue, fontSize: 60, transform: `scale(${emphasize(frame, b('together', 0.8))})`}}>協力</span>
+				</span>
 			</div>
 
-			<TeacherCharacter height={700} motion="nod" motionStart={b('check3')} style={{right: 60, bottom: -20}} />
+			<TeacherCharacter
+				height={700}
+				expression="smile"
+				cues={[
+					{at: b('afterBath', 0.3), pose: 'explain'},
+					{at: b('check1', -0.3), pose: 'check'},
+					{at: b('check3'), expression: 'serious'},
+					{at: b('together'), pose: 'normal', expression: 'happy'},
+				]}
+				nods={[b('check1'), b('check2'), b('check3', 0.4)]}
+				style={{right: 60, bottom: -20}}
+			/>
 		</SceneFrame>
 	);
 };

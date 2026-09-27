@@ -1,12 +1,12 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear, pop, progress} from '../components/anim';
+import {appear, overshoot, progress, stampIn} from '../components/anim';
 import {useBeats, useSceneDuration} from '../components/Contexts';
 import {FutonIcon} from '../components/Icons';
 import {ImagePlaceholder, SafeImg} from '../components/SafeImg';
 import {SceneFrame} from '../components/SceneFrame';
 import {SceneHeader} from '../components/SceneHeader';
-import {TeacherCharacter} from '../components/TeacherCharacter';
+import {Sparkle, TeacherCharacter} from '../components/TeacherCharacter';
 import {COLORS} from '../theme';
 
 // SCENE 4 ②ベッド・布団の準備（生活係は「声かけ・確認」）
@@ -19,11 +19,15 @@ export const BedScene: React.FC = () => {
 	const zoom = interpolate(frame, [0, duration], [1, 1.08]);
 	const emphasis = b('call');
 	const strike = progress(frame, b('rather'), 12);
-	const e = pop(frame, emphasis, 10);
 
 	return (
-		<SceneFrame>
-			<SceneHeader day={1} number={2} title="ベッド・布団の準備" />
+		<SceneFrame
+			hud={<SceneHeader day={1} number={2} title="ベッド・布団の準備" />}
+			camera={[
+				{at: b('call', 0.3), zoom: 1.08, x: 1150, y: 470, ease: 14},
+				{at: b('help', -0.4), zoom: 1, x: 1150, y: 470, ease: 18},
+			]}
+		>
 
 			<div
 				style={{
@@ -72,7 +76,7 @@ export const BedScene: React.FC = () => {
 			<div style={{position: 'absolute', left: 880, top: 240, width: 660}}>
 				<div style={{fontSize: 64, fontWeight: 700, color: COLORS.subText, ...appear(frame, b('lead'))}}>生活係は…</div>
 
-				<div style={{display: 'flex', alignItems: 'center', gap: 24, marginTop: 18, ...appear(frame, b('notAll'))}}>
+				<div style={{position: 'relative', display: 'flex', alignItems: 'center', gap: 24, marginTop: 18, ...appear(frame, b('notAll'))}}>
 					<div style={{position: 'relative', fontSize: 72, fontWeight: 700, color: COLORS.subText}}>
 						全部やる
 						<div
@@ -87,7 +91,19 @@ export const BedScene: React.FC = () => {
 							}}
 						/>
 					</div>
+					<div
+						style={{
+							fontSize: 80,
+							fontWeight: 700,
+							color: COLORS.red,
+							lineHeight: 1,
+							...(frame >= b('rather') ? stampIn(frame, b('rather')) : {opacity: 0}),
+						}}
+					>
+						✕
+					</div>
 					<div style={{fontSize: 52, fontWeight: 700, color: COLORS.text, ...appear(frame, b('rather'))}}>ではなく</div>
+
 				</div>
 
 				<div
@@ -101,15 +117,18 @@ export const BedScene: React.FC = () => {
 						padding: '24px 40px',
 						border: `8px solid ${COLORS.orange}`,
 						boxShadow: `0 12px 30px rgba(255,138,31,0.35)`,
-						opacity: Math.min(1, e * 1.5),
-						transform: `scale(${0.5 + 0.5 * e})`,
 						transformOrigin: 'left center',
+						position: 'relative',
+						...stampIn(frame, emphasis),
 					}}
 				>
 					<span style={{fontSize: 100, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>
 						声かけ
-						<span style={{opacity: progress(frame, b('check'), 10)}}>・確認</span>
+						<span style={{display: 'inline-block', ...(frame >= b('check') ? stampIn(frame, b('check')) : {opacity: 0})}}>・確認</span>
 					</span>
+					{frame >= b('check') ? (
+						<Sparkle x={620} y={10} size={36} scale={overshoot(frame, b('check', 0.3), 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 5))} />
+					) : null}
 				</div>
 
 				<div
@@ -132,7 +151,21 @@ export const BedScene: React.FC = () => {
 				</div>
 			</div>
 
-			<TeacherCharacter height={560} motion="nod" motionStart={emphasis} style={{right: 30, bottom: -20}} />
+			<TeacherCharacter
+				height={560}
+				expression="smile"
+				cues={[
+					{at: b('photo'), pose: 'point', pointDir: 'left'},
+					{at: b('lead'), pose: 'explain'},
+					{at: b('notAll'), expression: 'thinking'},
+					{at: b('rather'), expression: 'serious'},
+					{at: emphasis, expression: 'happy'},
+					{at: b('check'), pose: 'check'},
+					{at: b('help'), pose: 'explain', expression: 'gentle'},
+				]}
+				nods={[b('call', 0.5), b('check', 0.5), b('teach', 0.3)]}
+				style={{right: 30, bottom: -20}}
+			/>
 		</SceneFrame>
 	);
 };

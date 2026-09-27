@@ -38,6 +38,8 @@ export type SceneDef = {
 	beats: Record<string, number>;
 	/** ナレーション原稿 */
 	narration: string[];
+	/** <シーン名>.wav がない時だけ使う、仮のナレーション部品（at はナレーション開始からの秒） */
+	fallbackClips?: {file: string; at: number}[];
 };
 
 export const SCENES = {
@@ -242,22 +244,44 @@ export const SCENES = {
 		],
 	},
 	ending: {
-		label: 'SCENE11 まとめ',
+		label: 'SCENE11 まとめ（7つの仕事をもう一度）',
 		audioDelay: DELAY,
-		tailPadding: 1.5,
-		duration: 16.8,
+		// 最後に先生のアップ＋親指グッドで締めるため、少し長めに余裕をとる
+		tailPadding: 2.3,
+		duration: 34.4,
+		// ※ 下の秒数は、新しい ending.wav がまだないため「読み上げの速さ」から見積もった値です。
+		//   新しい ending.wav を入れたら、音声を聞いて合わせ直してください。
 		beats: {
 			msg1: 0.14, // 「生活係は、」
 			msg1b: 1.74, // 「みんなが気持ちよく宿泊するための」
 			msg1c: 3.0, // 「大切な係です」
-			msg2: 4.31, // 「自分の担当を確認して、」
-			msg2b: 6.65, // 「分からなくなったら」
-			msg2c: 8.74, // 「プリントを見ましょう」
-			msg3: 12.11, // 「みんなで協力して、楽しい宿泊学習にしよう！」
+			ask: 4.9, // 「分からなくなったら、」
+			print: 6.5, // 「プリントを見たり、」
+			askTeacher: 7.8, // 「先生に聞いたりしましょう」
+			review: 10.0, // 「仕事をもう一度確認します」
+			day1: 12.3, // 「1日目は、」
+			job1: 13.3, // リネンを配る
+			job2: 14.7, // ベッド・布団の準備
+			job3: 16.4, // お風呂掃除
+			job4: 17.7, // 健康チェックカード
+			day2: 20.3, // 「2日目は、」
+			job5: 21.3, // 荷物・布団整理の声かけ
+			job6: 23.5, // リネンを回収して返す
+			job7: 25.6, // 部屋の自主点検
+			final: 28.9, // 「みんなで協力して、楽しい宿泊学習にしよう！」
+			closeUp: 30.2, // 先生アップ＋親指グッド
 		},
+		// 新しい ending.wav がない間は、前の録音から原稿と同じ2文だけを使う
+		fallbackClips: [
+			{file: 'audio/scenes/ending-parts/01-taisetsu.wav', at: 0},
+			{file: 'audio/scenes/ending-parts/06-kyouryoku.wav', at: 28.69},
+		],
 		narration: [
 			'生活係は、みんなが気持ちよく宿泊するための大切な係です。',
-			'自分の担当を確認して、分からなくなったらプリントを見ましょう。',
+			'分からなくなったら、プリントを見たり、先生に聞いたりしましょう。',
+			'仕事をもう一度確認します。',
+			'1日目は、リネンを配る、ベッド・布団の準備、お風呂掃除、健康チェックカードです。',
+			'2日目は、荷物・布団整理の声かけ、リネンを回収して返す、部屋の自主点検です。',
 			'みんなで協力して、楽しい宿泊学習にしよう！',
 		],
 	},
@@ -314,3 +338,6 @@ export const sceneDelay = (key: SceneKey) => (SCENES[key] as SceneDef).audioDela
 
 /** ナレーション後の余裕（秒） */
 export const sceneTail = (key: SceneKey) => (SCENES[key] as SceneDef).tailPadding ?? SCENE_AUDIO_PADDING;
+
+/** 仮のナレーション部品（なければ空） */
+export const sceneFallbackClips = (key: SceneKey) => (SCENES[key] as SceneDef).fallbackClips ?? [];

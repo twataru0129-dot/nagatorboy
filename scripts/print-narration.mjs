@@ -14,4 +14,4 @@ for (const key of SCENE_ORDER) {
 	console.log('');
 	t += scene.duration;
 }
-console.log(`合計: ${fmt(t)}（${t}秒）`);
+console.log(`合計: ${fmt(t)}（${t.toFixed(1)}秒）`);

@@ -49,6 +49,10 @@ export type Availability = {
 	narration: boolean;
 	bgm: boolean;
 	sceneNarration: Record<string, boolean>;
+	/** teacher.png の幅÷高さ（寄りの計算に使う） */
+	teacherAspect?: number;
+	/** 仮のナレーション部品（ending.wav がない時に使う） */
+	fallbackClips?: Record<string, boolean>;
 };
 
 export const NO_ASSETS: Availability = {

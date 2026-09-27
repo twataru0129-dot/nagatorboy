@@ -1,6 +1,6 @@
 import React from 'react';
 import {CalculateMetadataFunction, Composition, staticFile} from 'remotion';
-import {getAudioDurationInSeconds} from '@remotion/media-utils';
+import {getAudioDurationInSeconds, getImageDimensions} from '@remotion/media-utils';
 import {LifeRoleVideo, LifeRoleVideoProps} from './LifeRoleVideo';
 import {AUDIO, Availability, IMAGES, NO_ASSETS, SFX, sceneNarrationPath} from './data/assets';
 import {
@@ -11,6 +11,7 @@ import {
 	SceneDurations,
 	WIDTH,
 	sceneDelay,
+	sceneFallbackClips,
 	sceneTail,
 	totalFrames,
 } from './data/scenes';
@@ -52,7 +53,18 @@ const calculateMetadata: CalculateMetadataFunction<LifeRoleVideoProps> = async (
 		exists(AUDIO.narration),
 		exists(AUDIO.bgm),
 	]);
-	const assets: Availability = {images, sfx, sceneNarration, narration, bgm};
+	let teacherAspect: number | undefined;
+	if (images.teacher) {
+		try {
+			const {width, height} = await getImageDimensions(staticFile(IMAGES.teacher));
+			teacherAspect = width / height;
+		} catch {
+			teacherAspect = undefined;
+		}
+	}
+	const clipFiles = SCENE_ORDER.flatMap((k) => sceneFallbackClips(k).map((c) => c.file));
+	const fallbackClips = await checkAll(Object.fromEntries(clipFiles.map((f) => [f, f])));
+	const assets: Availability = {images, sfx, sceneNarration, narration, bgm, teacherAspect, fallbackClips};
 
 	// シーンごとの音声があれば「開始前の間 + 音声の長さ + 終了後の余裕」にシーンの長さを自動調整
 	const durations: SceneDurations = {...DEFAULT_DURATIONS};

@@ -1,6 +1,6 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear, pop} from '../components/anim';
+import {appear, bounceIn, emphasize, pop} from '../components/anim';
 import {ArrowFlow} from '../components/ArrowFlow';
 import {useBeats} from '../components/Contexts';
 import {BagIcon, DoorIcon, PillowIcon, SheetIcon, StairsIcon} from '../components/Icons';
@@ -18,8 +18,13 @@ export const LinenReturnScene: React.FC = () => {
 	const bags = pop(frame, b('bags'), 13);
 
 	return (
-		<SceneFrame>
-			<SceneHeader day={2} number={6} title="リネンを回収して返す" />
+		<SceneFrame
+			hud={<SceneHeader day={2} number={6} title="リネンを回収して返す" />}
+			camera={[
+				{at: b('forget', 0.2), zoom: 1.07, x: 700, y: 820, ease: 14},
+				{at: b('forget', 2.2), zoom: 1, x: 700, y: 820, ease: 18},
+			]}
+		>
 
 			{/* 「使ったリネンを回収します」 */}
 			{frame < b('step1') ? (
@@ -74,7 +79,7 @@ export const LinenReturnScene: React.FC = () => {
 						),
 						at: b('step2'),
 					},
-					{label: <span style={{fontSize: 64}}>3階</span>, icon: <StairsIcon size={120} />, at: b('step3')},
+					{label: <span style={{display: 'inline-block', fontSize: 64, transform: `scale(${emphasize(frame, b('step3', 0.5))})`}}>3階</span>, icon: <StairsIcon size={120} />, at: b('step3')},
 					{label: <span style={{color: COLORS.blue}}>青い返却袋</span>, icon: <BagIcon size={120} />, at: b('step4')},
 				]}
 			/>
@@ -138,15 +143,27 @@ export const LinenReturnScene: React.FC = () => {
 					padding: '18px 40px',
 					boxShadow: `0 8px 20px ${COLORS.shadow}`,
 					lineHeight: 1.3,
-					...appear(frame, b('forget')),
+					...bounceIn(frame, b('forget')),
 				}}
 			>
 				取り忘れは
 				<br />
-				ないかな？
+				ないかな<span style={{display: 'inline-block', transform: `rotate(${Math.sin(frame / 6) * 12}deg)`}}>？</span>
 			</div>
 
-			<TeacherCharacter height={480} motion="nod" motionStart={b('forget')} style={{right: 50, bottom: -15}} />
+			<TeacherCharacter
+				height={480}
+				expression="smile"
+				cues={[
+					{at: b('used'), pose: 'explain'},
+					{at: b('step1'), pose: 'point', pointDir: 'left'},
+					{at: b('step3'), pose: 'explain', expression: 'smile'},
+					{at: b('forget'), pose: 'check', expression: 'thinking'},
+					{at: b('forget', 1.4), expression: 'serious'},
+				]}
+				nods={[b('step2', 0.4), b('step4', 0.4)]}
+				style={{right: 50, bottom: -15}}
+			/>
 		</SceneFrame>
 	);
 };
