@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Html5Audio, Sequence, staticFile} from 'remotion';
 import {AssetContext, SceneTimingProvider} from './components/Contexts';
 import {AUDIO, Availability, VOLUME, sceneNarrationPath} from './data/assets';
-import {SceneDurations, SceneKey, buildTimeline} from './data/scenes';
+import {FPS, SceneDurations, SceneKey, buildTimeline, sceneDelay} from './data/scenes';
 import {loadFonts} from './fonts';
 import {BathScene} from './scenes/BathScene';
 import {BedScene} from './scenes/BedScene';
@@ -49,11 +49,13 @@ export const LifeRoleVideo: React.FC<LifeRoleVideoProps> = ({assets, durations})
 					const hasSceneAudio = Boolean(assets.sceneNarration[key]);
 					return (
 						<Sequence key={key} from={from} durationInFrames={durationInFrames} name={key}>
-							<SceneTimingProvider sceneKey={key} durationInFrames={durationInFrames} scaleBeats={hasSceneAudio}>
+							<SceneTimingProvider sceneKey={key} durationInFrames={durationInFrames}>
 								<Scene />
 							</SceneTimingProvider>
 							{hasSceneAudio ? (
-								<Html5Audio src={staticFile(sceneNarrationPath(key))} volume={VOLUME.narration} />
+								<Sequence from={Math.round(sceneDelay(key) * FPS)} layout="none" name={`ナレーション ${key}`}>
+									<Html5Audio src={staticFile(sceneNarrationPath(key))} volume={VOLUME.narration} />
+								</Sequence>
 							) : null}
 						</Sequence>
 					);

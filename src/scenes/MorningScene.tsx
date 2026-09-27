@@ -76,6 +76,32 @@ export const MorningScene: React.FC = () => {
 				]}
 			/>
 
+			{/* 「声をかけましょう」 */}
+			{frame >= b('callAgain') && frame < gag ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 330,
+						top: 680,
+						display: 'flex',
+						alignItems: 'center',
+						gap: 20,
+						background: COLORS.green,
+						color: '#fff',
+						fontSize: 72,
+						fontWeight: 700,
+						borderRadius: 999,
+						padding: '16px 56px 16px 30px',
+						boxShadow: `0 10px 26px ${COLORS.shadow}`,
+						transform: `scale(${pop(frame, b('callAgain'))})`,
+						whiteSpace: 'nowrap',
+					}}
+				>
+					<MegaphoneIcon size={100} color="#fff" />
+					声をかけよう！
+				</div>
+			) : null}
+
 			{/* ギャグ：まだ夢の中の人がいたら… */}
 			{frame >= gag ? (
 				<div
@@ -97,7 +123,9 @@ export const MorningScene: React.FC = () => {
 					<SpeechBubble tail="right" color={COLORS.green} fontSize={54}>
 						まだ<span style={{color: COLORS.blue}}>夢の中</span>の人がいたら…
 						<br />
-						やさしく<span style={{color: COLORS.orange}}>現実</span>に戻してあげよう
+						<span style={{opacity: progress(frame, wry, 10)}}>
+							やさしく<span style={{color: COLORS.orange}}>現実</span>に戻してあげよう
+						</span>
 					</SpeechBubble>
 				</div>
 			) : null}

@@ -20,9 +20,10 @@ export const ReportScene: React.FC = () => {
 	const bubble = b('bubble');
 	const inspect = b('inspect');
 	const ok = b('ok');
+	const complete = b('complete');
 
 	// 生活係（生徒）が先生のところへ歩いていく
-	const walkP = interpolate(frame, [walk, walk + 50], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const walkP = interpolate(frame, [walk, walk + 80], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	const studentX = 120 + (1 - (1 - walkP) ** 2) * 640;
 	const stepBob = walkP > 0 && walkP < 1 ? Math.abs(Math.sin(frame / 3)) * -16 : 0;
 	const okIn = pop(frame, ok, 10);
@@ -35,7 +36,7 @@ export const ReportScene: React.FC = () => {
 			<ArrowFlow
 				style={{position: 'absolute', left: 60, top: 220}}
 				color={COLORS.green}
-				cardWidth={250}
+				cardWidth={200}
 				cardHeight={110}
 				fontSize={50}
 				arrowSize={64}
@@ -43,7 +44,9 @@ export const ReportScene: React.FC = () => {
 				steps={[
 					{label: '報告', at: bubble},
 					{label: '確認', at: inspect},
+					{label: '直す', at: b('fix')},
 					{label: 'OK！', at: ok},
+					{label: '完了', at: complete},
 				]}
 			/>
 
@@ -67,7 +70,7 @@ export const ReportScene: React.FC = () => {
 			</div>
 
 			{/* 「○○号室、終わりました！」 */}
-			{frame >= bubble ? (
+			{frame >= bubble && frame < ok ? (
 				<div
 					style={{
 						position: 'absolute',
@@ -165,6 +168,29 @@ export const ReportScene: React.FC = () => {
 				>
 					<CheckMark size={220} />
 					<div style={{fontSize: 150, fontWeight: 700, color: COLORS.green, lineHeight: 1}}>OK！</div>
+				</div>
+			) : null}
+
+			{/* 「生活係の仕事は完了です」 */}
+			{frame >= complete ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 60,
+						top: 440,
+						background: COLORS.green,
+						color: '#fff',
+						fontSize: 76,
+						fontWeight: 700,
+						borderRadius: 30,
+						padding: '16px 50px',
+						boxShadow: `0 12px 30px rgba(23,163,90,0.4)`,
+						transform: `scale(${pop(frame, complete)})`,
+						transformOrigin: 'left center',
+						whiteSpace: 'nowrap',
+					}}
+				>
+					生活係の仕事 完了！
 				</div>
 			) : null}
 

@@ -7,10 +7,11 @@ import {
 	DEFAULT_DURATIONS,
 	FPS,
 	HEIGHT,
-	SCENE_AUDIO_PADDING,
 	SCENE_ORDER,
 	SceneDurations,
 	WIDTH,
+	sceneDelay,
+	sceneTail,
 	totalFrames,
 } from './data/scenes';
 
@@ -53,13 +54,13 @@ const calculateMetadata: CalculateMetadataFunction<LifeRoleVideoProps> = async (
 	]);
 	const assets: Availability = {images, sfx, sceneNarration, narration, bgm};
 
-	// シーンごとの音声があれば、その長さに合わせてシーンの長さを自動調整
+	// シーンごとの音声があれば「開始前の間 + 音声の長さ + 終了後の余裕」にシーンの長さを自動調整
 	const durations: SceneDurations = {...DEFAULT_DURATIONS};
 	for (const key of SCENE_ORDER) {
 		if (sceneNarration[key]) {
 			const len = await audioLength(sceneNarrationPath(key));
 			if (len) {
-				durations[key] = Math.round((len + SCENE_AUDIO_PADDING) * 10) / 10;
+				durations[key] = Math.ceil((sceneDelay(key) + len + sceneTail(key)) * FPS) / FPS;
 			}
 		}
 	}

@@ -17,8 +17,8 @@ export const BedScene: React.FC = () => {
 	const duration = useSceneDuration();
 	// 写真をゆっくりズーム
 	const zoom = interpolate(frame, [0, duration], [1, 1.08]);
-	const emphasis = b('emphasis');
-	const strike = progress(frame, b('notAll') + 10, 10);
+	const emphasis = b('call');
+	const strike = progress(frame, b('rather'), 12);
 	const e = pop(frame, emphasis, 10);
 
 	return (
@@ -36,7 +36,7 @@ export const BedScene: React.FC = () => {
 					overflow: 'hidden',
 					border: '8px solid #fff',
 					boxShadow: `0 10px 26px ${COLORS.shadow}`,
-					...appear(frame, 6, 40, 18),
+					...appear(frame, b('photo'), 40, 18),
 				}}
 			>
 				<div style={{width: '100%', height: '100%', transform: `scale(${zoom})`}}>
@@ -106,7 +106,10 @@ export const BedScene: React.FC = () => {
 						transformOrigin: 'left center',
 					}}
 				>
-					<span style={{fontSize: 100, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>声かけ・確認</span>
+					<span style={{fontSize: 100, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>
+						声かけ
+						<span style={{opacity: progress(frame, b('check'), 10)}}>・確認</span>
+					</span>
 				</div>
 
 				<div
@@ -125,7 +128,7 @@ export const BedScene: React.FC = () => {
 				>
 					困っている人には
 					<br />
-					やさしく教える
+					<span style={{opacity: progress(frame, b('teach'), 10)}}>やさしく教える</span>
 				</div>
 			</div>
 

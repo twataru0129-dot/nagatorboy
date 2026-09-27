@@ -20,13 +20,22 @@ export const EndingScene: React.FC = () => {
 		<SceneFrame background={<PlazaBackground dim={0.55} zoom={interpolate(frame, [0, 240], [1.05, 1])} />} fadeOut={20}>
 			<Message start={m1} end={m2}>
 				<div style={{fontSize: 60, color: COLORS.subText}}>生活係は</div>
-				<div style={{fontSize: 64}}>みんなが気持ちよく過ごすための</div>
-				<div style={{fontSize: 104, color: COLORS.blue}}>大切な係！</div>
+				<Reveal at={b('msg1b')}>
+					<div style={{fontSize: 64}}>みんなが気持ちよく過ごすための</div>
+				</Reveal>
+				<Reveal at={b('msg1c')}>
+					<div style={{fontSize: 104, color: COLORS.blue}}>大切な係！</div>
+				</Reveal>
 			</Message>
 			<Message start={m2} end={m3}>
 				<div style={{fontSize: 84, color: COLORS.blue}}>自分の担当を確認！</div>
 				<div style={{fontSize: 64, marginTop: 10}}>
-					分からなくなったら<span style={{color: COLORS.green}}>プリント</span>を見よう！
+					<Reveal at={b('msg2b')} inline>
+						分からなくなったら
+					</Reveal>
+					<Reveal at={b('msg2c')} inline>
+						<span style={{color: COLORS.green}}>プリント</span>を見よう！
+					</Reveal>
 				</div>
 			</Message>
 			<Message start={m3}>
@@ -84,4 +93,12 @@ const Message: React.FC<{start: number; end?: number; children: React.ReactNode}
 			{children}
 		</div>
 	);
+};
+
+/** ナレーションに合わせて、行（または言葉）をふわっと出す */
+const Reveal: React.FC<{at: number; inline?: boolean; children: React.ReactNode}> = ({at, inline, children}) => {
+	const frame = useCurrentFrame();
+	const p = interpolate(frame, [at, at + 10], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const Tag = inline ? 'span' : 'div';
+	return <Tag style={{opacity: p, display: inline ? 'inline-block' : 'block', transform: `translateY(${(1 - p) * 16}px)`}}>{children}</Tag>;
 };
