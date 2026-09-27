@@ -23,4 +23,8 @@ npx remotion ffmpeg -y -loglevel error -i out/master-1080p.mp4 \
 # 3) ページ用のポスター画像（タイトル場面）
 npx remotion ffmpeg -y -loglevel error -ss 7 -i preview.mp4 -frames:v 1 -q:v 3 poster.jpg
 
-echo "preview.mp4 と poster.jpg を更新しました"
+# 4) ブラウザや GitHub Pages に古い動画が残らないよう、index.html の版番号を更新
+VERSION=$(date +%Y%m%d%H%M)
+sed -i.bak -E "s/(preview\.mp4|poster\.jpg)\?v=[0-9A-Za-z]+/\1?v=${VERSION}/g" index.html && rm -f index.html.bak
+
+echo "preview.mp4 と poster.jpg を更新しました（版番号 v=${VERSION}）"
