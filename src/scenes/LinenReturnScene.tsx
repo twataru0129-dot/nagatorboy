@@ -56,10 +56,10 @@ export const LinenReturnScene: React.FC = () => {
 			<div
 				style={{
 					position: 'absolute',
-					left: 120,
-					top: 580,
-					width: 820,
-					height: 460,
+					left: 200,
+					top: 570,
+					width: 500,
+					height: 470,
 					borderRadius: 30,
 					overflow: 'hidden',
 					border: `8px solid ${COLORS.blue}`,
@@ -71,7 +71,7 @@ export const LinenReturnScene: React.FC = () => {
 			>
 				<SafeImg
 					name="returnBags"
-					style={{width: '100%', height: '100%'}}
+					style={{width: '100%', height: '100%', objectPosition: '50% 100%'}}
 					fallback={
 						<ImagePlaceholder label="return-bags.png" style={{width: '100%', height: '100%'}}>
 							<div style={{display: 'flex', gap: 20}}>
@@ -101,7 +101,7 @@ export const LinenReturnScene: React.FC = () => {
 			<div
 				style={{
 					position: 'absolute',
-					left: 1000,
+					left: 790,
 					top: 760,
 					background: COLORS.orange,
 					color: '#fff',

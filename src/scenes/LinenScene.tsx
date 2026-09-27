@@ -60,7 +60,7 @@ export const LinenScene: React.FC = () => {
 						padding: '8px 0',
 					}}
 				>
-					リネン置き場
+					リネン置き場（3階）
 				</div>
 			</div>
 

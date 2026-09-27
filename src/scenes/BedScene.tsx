@@ -16,7 +16,7 @@ export const BedScene: React.FC = () => {
 	const b = useBeats();
 	const duration = useSceneDuration();
 	// 写真をゆっくりズーム
-	const zoom = interpolate(frame, [0, duration], [1, 1.18]);
+	const zoom = interpolate(frame, [0, duration], [1, 1.08]);
 	const emphasis = b('emphasis');
 	const strike = progress(frame, b('notAll') + 10, 10);
 	const e = pop(frame, emphasis, 10);
@@ -29,9 +29,9 @@ export const BedScene: React.FC = () => {
 				style={{
 					position: 'absolute',
 					left: 60,
-					top: 240,
-					width: 760,
-					height: 620,
+					top: 280,
+					width: 780,
+					height: 470,
 					borderRadius: 30,
 					overflow: 'hidden',
 					border: '8px solid #fff',
@@ -49,6 +49,22 @@ export const BedScene: React.FC = () => {
 							</ImagePlaceholder>
 						}
 					/>
+				</div>
+				<div
+					style={{
+						position: 'absolute',
+						left: 0,
+						right: 0,
+						bottom: 0,
+						background: 'rgba(28,111,214,0.9)',
+						color: '#fff',
+						fontSize: 40,
+						fontWeight: 700,
+						textAlign: 'center',
+						padding: '6px 0',
+					}}
+				>
+					ベッドメイキング 完成図
 				</div>
 			</div>
 
