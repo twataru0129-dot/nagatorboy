@@ -1,0 +1,28 @@
+{
+  "name": "nagatoro-life-role-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "宿泊学習 生活係の仕事 説明動画（Remotion）",
+  "scripts": {
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "render": "remotion render LifeRoleVideo out/life-role-video.mp4",
+    "still": "remotion still LifeRoleVideo out/still.png",
+    "typecheck": "tsc --noEmit",
+    "sfx": "node scripts/generate-sfx.mjs",
+    "narration": "node scripts/print-narration.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.529",
+    "@remotion/google-fonts": "^4.0.529",
+    "@remotion/media-utils": "^4.0.529",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "^4.0.529"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
