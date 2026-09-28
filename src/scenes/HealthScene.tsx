@@ -1,9 +1,10 @@
 import React from 'react';
+import {interpolate, useCurrentFrame} from 'remotion';
 import {useBeats} from '../components/Contexts';
 import {TeacherCharacter} from '../components/TeacherCharacter';
 import {PointCallout, StepLine} from '../design/Cards';
 import {JobHeader} from '../design/JobHeader';
-import {Eyebrow} from '../design/Kinetic';
+import {Eyebrow, RevealText} from '../design/Kinetic';
 import {StylishFrame} from '../design/StylishFrame';
 import {afterSettle, SETTLE} from '../design/jobScene';
 import {INK} from '../design/tokens';
@@ -14,6 +15,7 @@ import {INK} from '../design/tokens';
 const A = INK.day1;
 
 export const HealthScene: React.FC = () => {
+	const frame = useCurrentFrame();
 	const b = useBeats();
 	return (
 		<StylishFrame
@@ -23,6 +25,19 @@ export const HealthScene: React.FC = () => {
 			hud={<JobHeader n={4} title="健康チェックカード" eyebrow="DAY 1  ·  21:50ごろ" accent={A} settleAt={SETTLE} />}
 		>
 			<Eyebrow text="BEFORE BED  /  寝る前に" at={afterSettle(b('night'))} color={A} size={30} style={{position: 'absolute', left: 80, top: 260}} />
+			{/* 「夜、寝る前には健康チェックがあります」：手順が出るまで大きく */}
+			{frame < b('step1') ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 80,
+						top: 360,
+						opacity: interpolate(frame, [b('step1', -0.35), b('step1')], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+					}}
+				>
+					<RevealText text={'寝る前に\n健康チェック'} at={afterSettle(b('night'))} size={140} highlight={[{text: '健康チェック', color: A}]} />
+				</div>
+			) : null}
 			<StepLine
 				accent={A}
 				left={80}

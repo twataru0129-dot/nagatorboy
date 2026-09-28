@@ -71,7 +71,7 @@ export const IntroScene: React.FC = () => {
 				{at: b('wave', 0.6), zoom: 1.18, x: 1480, y: 600, ease: 18},
 				{at: titleAt, zoom: 1, x: 1480, y: 600, ease: 14},
 				// オチ（「生活係の仕事の流れも…」）で一瞬寄る
-				...punchIn(jaan, 1300, 520, 1.1, 22),
+				...punchIn(jaan, 1000, 520, 1.07, 22),
 			]}
 		>
 			{/* ボート（ジャンプ前は人物が乗っている） */}
