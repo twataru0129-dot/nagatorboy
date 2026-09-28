@@ -180,7 +180,17 @@ export const StepLine: React.FC<{
 	return (
 		<div style={{position: 'absolute', left, top, width, height: node + 200}}>
 			{/* 背景の線 */}
-			<div style={{position: 'absolute', left: node / 2, top: node / 2 - 2, width: width - node, height: 4, background: INK.faint, borderRadius: 2}} />
+			<div
+				style={{
+					position: 'absolute',
+					left: node / 2,
+					top: node / 2 - 2,
+					width: (width - node) * ramp(frame, steps[0].at - 4, 20),
+					height: 4,
+					background: INK.faint,
+					borderRadius: 2,
+				}}
+			/>
 			{/* 進んだ分だけ光る線 */}
 			{steps.map((s, i) =>
 				i === 0 ? null : (
