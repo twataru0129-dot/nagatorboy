@@ -1,215 +1,84 @@
 import React from 'react';
 import {useCurrentFrame} from 'remotion';
-import {appear, bounceIn, emphasize, overshoot, stampIn} from '../components/anim';
-import {ArrowFlow} from '../components/ArrowFlow';
-import {Clock} from '../components/Clock';
 import {useBeats} from '../components/Contexts';
-import {DoorIcon, PillowIcon, RackIcon, SheetIcon} from '../components/Icons';
-import {ImagePlaceholder, SafeImg} from '../components/SafeImg';
-import {SceneFrame} from '../components/SceneFrame';
-import {SceneHeader} from '../components/SceneHeader';
-import {TeacherCharacter} from '../components/TeacherCharacter';
-import {COLORS} from '../theme';
+import {BigNumber, PhotoCard, PointCallout, StepLine} from '../design/Cards';
+import {JobHeader} from '../design/JobHeader';
+import {Eyebrow, Rise} from '../design/Kinetic';
+import {LineIcon} from '../design/LineIcon';
+import {StylishFrame} from '../design/StylishFrame';
+import {afterSettle, SETTLE} from '../design/jobScene';
+import {FONT_JP, INK} from '../design/tokens';
 
-// SCENE 3 1日目 17:00ごろ ①リネンを配る
+// SCENE 3 ①リネンを配る（1日目 17:00ごろ）
+// 仕事名 → 内容（1人1セット：シーツ2枚・枕カバー1枚／置き場→部屋） → ポイント（人数を確認）
+
+const A = INK.day1;
 
 export const LinenScene: React.FC = () => {
-	const frame = useCurrentFrame();
 	const b = useBeats();
-	const set = b('set');
-	const enough = b('enough');
-
 	return (
-		<SceneFrame
-			hud={<SceneHeader day={1} number={1} title="リネンを配る" time={<Clock time="17:00" day={1} start={4} />} />}
+		<StylishFrame
+			accent={A}
+			watermark="01"
+			hud={<JobHeader n={1} title="リネンを配る" eyebrow="DAY 1  ·  17:00ごろ" accent={A} settleAt={SETTLE} />}
 			camera={[
-				{at: b('set', 0.4), zoom: 1.07, x: 1075, y: 440, ease: 16},
-				{at: b('flow', -0.8), zoom: 1, x: 1075, y: 440, ease: 16},
+				{at: b('set', 0.4), zoom: 1.05, x: 1350, y: 460, ease: 18},
+				{at: b('flow', -0.6), zoom: 1, x: 1350, y: 460, ease: 18},
 			]}
 		>
-
-			{/* リネン置き場の写真 */}
-			<div
-				style={{
-					position: 'absolute',
-					left: 60,
-					top: 240,
-					width: 560,
-					height: 400,
-					borderRadius: 30,
-					overflow: 'hidden',
-					boxShadow: `0 10px 26px ${COLORS.shadow}`,
-					border: '8px solid #fff',
-					...appear(frame, b('rack'), 40, 18),
-				}}
-			>
-				<SafeImg
-					name="linenRack"
-					style={{width: '100%', height: '100%'}}
-					fallback={
-						<ImagePlaceholder label="linen-rack.png" style={{width: '100%', height: '100%'}}>
-							<RackIcon size={220} />
-						</ImagePlaceholder>
-					}
-				/>
-				<div
-					style={{
-						position: 'absolute',
-						left: 0,
-						right: 0,
-						bottom: 0,
-						background: 'rgba(28,111,214,0.9)',
-						color: '#fff',
-						fontSize: 42,
-						fontWeight: 700,
-						textAlign: 'center',
-						padding: '8px 0',
-					}}
-				>
-					リネン置き場（3階）
-				</div>
-			</div>
+			<PhotoCard
+				name="linenRack"
+				at={afterSettle(b('rack'))}
+				caption="LINEN ROOM  ·  リネン置き場（3階）"
+				accent={A}
+				fallbackIcon="rack"
+				style={{left: 80, top: 230, width: 700, height: 470}}
+			/>
 
 			{/* 1人1セット */}
-			<div
-				style={{
-					position: 'absolute',
-					left: 660,
-					top: 240,
-					width: 830,
-					height: 400,
-					boxSizing: 'border-box',
-					background: '#fff',
-					borderRadius: 30,
-					border: `8px solid ${COLORS.blue}`,
-					boxShadow: `0 10px 26px ${COLORS.shadow}`,
-					padding: '22px 36px',
-					...appear(frame, set, 40, 18),
-				}}
-			>
-				<div
-					style={{
-						fontSize: 70,
-						fontWeight: 700,
-						color: '#fff',
-						background: COLORS.blue,
-						borderRadius: 20,
-						textAlign: 'center',
-						padding: '4px 0 8px',
-					}}
-				>
-					1人1セット
-				</div>
-				<div style={{display: 'flex', justifyContent: 'center', gap: 40, marginTop: 22}}>
-					<LinenCount icon={<SheetIcon size={120} />} copies={2} label="シーツ" count="2枚" start={b('sheets')} />
-					<LinenCount icon={<PillowIcon size={120} />} copies={1} label="枕カバー" count="1枚" start={b('pillow')} />
+			<div style={{position: 'absolute', left: 880, top: 236, width: 960}}>
+				<Eyebrow text="ONE SET  /  1人1セット" at={b('set')} color={A} size={28} />
+				<div style={{display: 'flex', gap: 80, marginTop: 28}}>
+					<Count at={b('sheets')} icon="sheet" label="シーツ" value="2" />
+					<Count at={b('pillow')} icon="pillow" label="枕カバー" value="1" />
 				</div>
 			</div>
 
-			{/* リネン置き場 → 担当する部屋 */}
-			<ArrowFlow
-				style={{position: 'absolute', left: 60, top: 700, width: 1430}}
-				color={COLORS.blue}
-				cardWidth={470}
-				cardHeight={230}
-				fontSize={52}
-				arrowSize={120}
-				gap={30}
+			<StepLine
+				accent={A}
+				left={80}
+				top={750}
+				width={700}
+				node={120}
+				labelSize={36}
 				steps={[
-					{label: 'リネン置き場', icon: <RackIcon size={110} />, at: b('flow', -0.6)},
-					{label: '担当する部屋', icon: <DoorIcon size={110} />, at: b('flow')},
+					{label: 'リネン置き場', icon: 'rack', at: b('flow', -0.6)},
+					{label: '担当する部屋', icon: 'door', at: b('flow')},
 				]}
 			/>
 
-			{frame >= b('count') ? (
-				<div
-					style={{
-						position: 'absolute',
-						left: 700,
-						top: 950,
-						background: COLORS.orange,
-						color: '#fff',
-						fontSize: 46,
-						fontWeight: 700,
-						borderRadius: 999,
-						padding: '10px 34px',
-						boxShadow: `0 6px 16px ${COLORS.shadow}`,
-						...stampIn(frame, b('count')),
-						whiteSpace: 'nowrap',
-					}}
-				>
-					人数を確認！
-				</div>
-			) : null}
-
-			{frame >= enough ? (
-				<div
-					style={{
-						position: 'absolute',
-						left: 1090,
-						top: 950,
-						background: COLORS.blue,
-						color: '#fff',
-						fontSize: 46,
-						fontWeight: 700,
-						borderRadius: 999,
-						padding: '10px 34px',
-						boxShadow: `0 6px 16px ${COLORS.shadow}`,
-						...bounceIn(frame, enough),
-						whiteSpace: 'nowrap',
-					}}
-				>
-					必要な分だけ配る
-				</div>
-			) : null}
-
-			<TeacherCharacter
-				height={700}
-				expression="smile"
-				cues={[
-					{at: b('rack'), pose: 'point', pointDir: 'left'},
-					{at: set, pose: 'explain'},
-					{at: b('flow', -0.6), pose: 'point', pointDir: 'left'},
-					{at: b('count'), pose: 'check', expression: 'serious'},
-					{at: enough, pose: 'normal', expression: 'happy'},
-				]}
-				nods={[b('sheets', 0.3), b('pillow', 0.3)]}
-				style={{right: 40, bottom: -20}}
-			/>
-		</SceneFrame>
+			<PointCallout at={b('count')} style={{left: 880, top: 800}} size={54}>
+				人数を確認して、必要な分だけ
+			</PointCallout>
+		</StylishFrame>
 	);
 };
 
-const LinenCount: React.FC<{icon: React.ReactNode; copies: number; label: string; count: string; start: number}> = ({
-	icon,
-	copies,
-	label,
-	count,
-	start,
-}) => {
+const Count: React.FC<{at: number; icon: 'sheet' | 'pillow'; label: string; value: string}> = ({at, icon, label, value}) => {
 	const frame = useCurrentFrame();
-	const p = overshoot(frame, start, 16, 0.18);
+	if (frame < at - 2) {
+		return <div style={{width: 360}} />;
+	}
 	return (
-		<div
-			style={{
-				display: 'flex',
-				flexDirection: 'column',
-				alignItems: 'center',
-				opacity: Math.min(1, p * 2),
-				transform: `scale(${0.7 + 0.3 * p})`,
-			}}
-		>
-			<div style={{display: 'flex', height: 130, alignItems: 'center'}}>
-				{Array.from({length: copies}).map((_, i) => (
-					<div key={i} style={{marginLeft: i === 0 ? 0 : -14}}>
-						{icon}
-					</div>
-				))}
+		<Rise at={at} style={{width: 360}}>
+			<div style={{display: 'flex', alignItems: 'center', gap: 18}}>
+				<LineIcon name={icon} size={84} color={A} />
+				<div style={{fontFamily: FONT_JP, fontWeight: 700, fontSize: 56, color: INK.white}}>{label}</div>
 			</div>
-			<div style={{display: 'flex', alignItems: 'baseline', gap: 14, whiteSpace: 'nowrap'}}>
-				<span style={{fontSize: 50, fontWeight: 700, color: COLORS.text}}>{label}</span>
-				<span style={{display: 'inline-block', fontSize: 76, fontWeight: 700, color: COLORS.orange, transform: `scale(${emphasize(frame, start + 10)})`}}>{count}</span>
+			<div style={{display: 'flex', alignItems: 'flex-end', gap: 14, marginTop: 10}}>
+				<BigNumber value={value} at={at + 4} size={250} color={A} />
+				<div style={{fontFamily: FONT_JP, fontWeight: 700, fontSize: 80, color: INK.white, paddingBottom: 18}}>枚</div>
 			</div>
-		</div>
+		</Rise>
 	);
 };

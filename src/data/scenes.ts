@@ -72,13 +72,14 @@ export const SCENES = {
 	facility: {
 		label: 'SCENE2 長瀞げんきプラザ',
 		audioDelay: DELAY,
-		duration: 17.9,
+		duration: 21.3,
 		beats: {
 			place: 0.2, // 「ここ、長瀞げんきプラザで」
 			role: 1.1, // 「生活係は、」
 			comfort: 3.9, // 「みんなが気持ちよく過ごせるように動きます」
-			jobs: 6.8, // 「仕事は、大きく7つあります」→ 7つのカード（順番に出る）
-			allShown: 9.3, // 7つのカードがすべて出そろう → ここから読む時間
+			jobs: 6.8, // 「仕事は、大きく7つあります」→ 大きな「7」
+			tiles: 8.8, // 7つの仕事カードが1つずつ登場（0.55秒間隔）
+			allShown: 12.7, // 7つのカードがすべて出そろう → ここから読む時間
 		},
 		// 7つ全部が出そろってから、約8秒は一覧をそのまま見せる
 		holdAfter: {beat: 'allShown', seconds: 8},

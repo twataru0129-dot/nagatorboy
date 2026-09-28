@@ -1,18 +1,22 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear, bounceIn, overshoot} from '../components/anim';
-import {ArrowFlow} from '../components/ArrowFlow';
 import {punchIn} from '../components/Camera';
 import {useBeats} from '../components/Contexts';
-import {CheckMark, PersonIcon, SearchIcon} from '../components/Icons';
-import {SceneFrame} from '../components/SceneFrame';
-import {SceneHeader} from '../components/SceneHeader';
 import {Sfx} from '../components/Sfx';
-import {SpeechBubble} from '../components/SpeechBubble';
 import {TeacherCharacter} from '../components/TeacherCharacter';
-import {COLORS} from '../theme';
+import {Spotlight} from '../design/Backdrop';
+import {Bubble, PointCallout, StepLine} from '../design/Cards';
+import {JobHeader} from '../design/JobHeader';
+import {Eyebrow} from '../design/Kinetic';
+import {LineIcon} from '../design/LineIcon';
+import {StylishFrame} from '../design/StylishFrame';
+import {SETTLE} from '../design/jobScene';
+import {FONT_EN, INK} from '../design/tokens';
 
-// SCENE 10 2日目 担任へ報告 → 確認 → OK！
+// SCENE 10 担任へ報告 → 確認 → 直す → OK → 完了
+
+const A = INK.day2;
+const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
 export const ReportScene: React.FC = () => {
 	const frame = useCurrentFrame();
@@ -22,85 +26,96 @@ export const ReportScene: React.FC = () => {
 	const inspect = b('inspect');
 	const ok = b('ok');
 	const complete = b('complete');
-
-	// 生活係（生徒）が先生のところへ歩いていく
-	const walkP = interpolate(frame, [walk, walk + 80], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-	const studentX = 120 + (1 - (1 - walkP) ** 2) * 640;
-	const stepBob = walkP > 0 && walkP < 1 ? Math.abs(Math.sin(frame / 3)) * -16 : 0;
-	const okIn = interpolate(frame - ok, [0, 6, 10, 14], [2.0, 0.92, 1.05, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-	// 先生のところに着いたら「ぴょん」
-	const arrive = walk + 80;
-	const arriveHop = frame >= arrive && frame < arrive + 12 ? -Math.sin(((frame - arrive) / 12) * Math.PI) * 22 : 0;
+	// 生活係（生徒）が先生のほうへ歩く
+	const walkP = interpolate(frame, [walk, walk + 80], [0, 1], {...clamp});
+	const studentX = 120 + (1 - (1 - walkP) ** 2) * 520;
+	const stepBob = walkP > 0 && walkP < 1 ? -Math.abs(Math.sin(frame / 3)) * 12 : 0;
+	// OK の円
+	const okS = interpolate(frame - ok, [0, 6, 10, 14], [1.8, 0.94, 1.03, 1], clamp);
+	const ring = interpolate(frame - ok, [0, 20], [0, 1], clamp);
 
 	return (
-		<SceneFrame
-			hud={<SceneHeader day={2} title="最後に 担任の先生へ報告" />}
+		<StylishFrame
+			accent={A}
+			watermark="OK"
+			variant={2}
+			hud={<JobHeader title="担任の先生へ報告" eyebrow="DAY 2  ·  FINAL STEP" accent={A} settleAt={SETTLE} showProgress={false} />}
 			camera={[
-				// 生活係の報告に少し寄る → 戻る
-				{at: bubble + 6, zoom: 1.06, x: 620, y: 620, ease: 14},
-				{at: b('inspect', -0.3), zoom: 1, x: 620, y: 620, ease: 18},
-				// OK！で一瞬寄る
-				...punchIn(ok, 1160, 600, 1.1, 26),
+				{at: bubble + 6, zoom: 1.05, x: 600, y: 620, ease: 14},
+				{at: inspect - 10, zoom: 1, x: 600, y: 620, ease: 18},
+				...punchIn(ok, 1150, 610, 1.06, 26),
 			]}
 		>
-
-			{/* 報告 → 確認 → OK の流れ */}
-			<ArrowFlow
-				style={{position: 'absolute', left: 60, top: 220}}
-				color={COLORS.green}
-				cardWidth={200}
-				cardHeight={110}
-				fontSize={50}
-				arrowSize={64}
-				gap={10}
+			<Spotlight x={1560} y={640} size={900} color={A} />
+			<StepLine
+				accent={A}
+				left={80}
+				top={225}
+				width={1050}
+				node={84}
+				labelSize={30}
 				steps={[
-					{label: '報告', at: bubble},
-					{label: '確認', at: inspect},
-					{label: '直す', at: b('fix')},
-					{label: 'OK！', at: ok},
-					{label: '完了', at: complete},
+					{label: '報告', icon: 'voice', at: bubble},
+					{label: '確認', icon: 'search', at: inspect},
+					{label: '直す', icon: 'broom', at: b('fix')},
+					{label: 'OK', icon: 'check', at: ok},
+					{label: '完了', icon: 'people', at: complete},
 				]}
 			/>
 
-			{/* 生活係（生徒のピクトグラム） */}
-			<div style={{position: 'absolute', left: studentX, top: 690 + stepBob + arriveHop, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-				<PersonIcon size={300} color={COLORS.green} />
-				<div
-					style={{
-						marginTop: -6,
-						background: COLORS.green,
-						color: '#fff',
-						fontSize: 40,
-						fontWeight: 700,
-						borderRadius: 14,
-						padding: '4px 22px',
-						whiteSpace: 'nowrap',
-					}}
-				>
-					生活係
-				</div>
+			{/* 生活係（生徒） */}
+			<div style={{position: 'absolute', left: studentX, top: 780 + stepBob, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+				<LineIcon name="person" size={200} color={A} stroke={6} />
+				<Eyebrow text="生活係" at={walk} color={A} size={28} />
 			</div>
 
-			{/* 「○○号室、終わりました！」 */}
-			{frame >= bubble && frame < ok ? (
-				<div
-					style={{
-						position: 'absolute',
-						left: 330,
-						top: 380,
-						transform: `scale(${overshoot(frame, bubble, 14, 0.16)})`,
-						transformOrigin: '20% 100%',
-					}}
-				>
-					<SpeechBubble tail="bottom" color={COLORS.green} fontSize={80}>
-						○○号室、
-						<br />
-						終わりました！
-					</SpeechBubble>
+			{frame < ok ? (
+				<Bubble at={bubble} accent={A} size={72} style={{left: 360, top: 470}}>
+					○○号室、
+					<br />
+					終わりました！
+				</Bubble>
+			) : null}
+
+			{/* 先生が確認中 */}
+			{frame >= inspect && frame < ok ? (
+				<div style={{position: 'absolute', left: 1010, top: 520, opacity: interpolate(frame - inspect, [0, 8], [0, 1], clamp)}}>
+					<div style={{transform: `translate(${Math.sin(frame / 6) * 14}px, ${Math.cos(frame / 6) * 8}px)`}}>
+						<LineIcon name="search" size={170} color={INK.white} />
+					</div>
+					<Eyebrow text="CHECKING" at={inspect} color={A} />
 				</div>
 			) : null}
 
-			{/* 担任の先生（説明役の人物） */}
+			{/* OK */}
+			{frame >= ok ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 930,
+						top: 390,
+						width: 440,
+						height: 440,
+						borderRadius: '50%',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						transform: `scale(${okS})`,
+						opacity: interpolate(frame - ok, [0, 4], [0, 1], clamp),
+						background: `radial-gradient(circle, ${A}33 0%, ${A}00 70%)`,
+					}}
+				>
+					<svg width="440" height="440" viewBox="0 0 440 440" style={{position: 'absolute', inset: 0}}>
+						<circle cx="220" cy="220" r="200" fill="none" stroke={A} strokeWidth="10" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - ring} transform="rotate(-90 220 220)" />
+					</svg>
+					<div style={{fontFamily: FONT_EN, fontWeight: 800, fontSize: 190, color: INK.white, letterSpacing: -4}}>OK</div>
+				</div>
+			) : null}
+
+			<PointCallout at={complete} style={{left: 80, top: 480}} size={56}>
+				生活係の仕事、完了！
+			</PointCallout>
+
 			<TeacherCharacter
 				height={720}
 				expression="smile"
@@ -112,114 +127,9 @@ export const ReportScene: React.FC = () => {
 					{at: ok, pose: 'thumbsUp', expression: 'happy'},
 				]}
 				nods={[b('bubble', 1.2), b('fix', 0.6)]}
-				style={{right: 180, bottom: -20}}
+				style={{right: 130, bottom: -20}}
 			/>
-			<div
-				style={{
-					position: 'absolute',
-					right: 170,
-					top: 290,
-					background: '#fff',
-					border: `4px solid ${COLORS.blue}`,
-					color: COLORS.blue,
-					fontSize: 40,
-					fontWeight: 700,
-					borderRadius: 14,
-					padding: '4px 22px',
-					...appear(frame, walk),
-				}}
-			>
-				担任の先生
-			</div>
-
-			{/* 先生が部屋を確認 */}
-			{frame >= inspect && frame < ok ? (
-				<div
-					style={{
-						position: 'absolute',
-						left: 1130,
-						top: 400,
-						display: 'flex',
-						flexDirection: 'column',
-						alignItems: 'center',
-						gap: 10,
-						...appear(frame, inspect),
-					}}
-				>
-					<div style={{transform: `translate(${Math.sin(frame / 6) * 16}px, ${Math.cos(frame / 6) * 10}px)`}}>
-						<SearchIcon size={170} />
-					</div>
-					<div
-						style={{
-							fontSize: 44,
-							fontWeight: 700,
-							color: COLORS.text,
-							background: '#fff',
-							borderRadius: 20,
-							padding: '10px 24px',
-							boxShadow: `0 6px 16px ${COLORS.shadow}`,
-							textAlign: 'center',
-							lineHeight: 1.3,
-							...appear(frame, b('fix')),
-						}}
-					>
-						直すところは
-						<br />
-						直そう
-					</div>
-				</div>
-			) : null}
-
-			{/* OK！ */}
-			{frame >= ok ? (
-				<div
-					style={{
-						position: 'absolute',
-						left: 900,
-						top: 360,
-						width: 520,
-						height: 520,
-						borderRadius: '50%',
-						background: '#fff',
-						border: `18px solid ${COLORS.green}`,
-						boxShadow: `0 16px 40px rgba(23,163,90,0.35)`,
-						display: 'flex',
-						flexDirection: 'column',
-						alignItems: 'center',
-						justifyContent: 'center',
-						opacity: Math.min(1, (frame - ok + 1) / 4),
-						transform: `scale(${okIn}) rotate(${(1 - Math.min(1, okIn)) * -12}deg)`,
-					}}
-				>
-					<CheckMark size={220} />
-					<div style={{fontSize: 150, fontWeight: 700, color: COLORS.green, lineHeight: 1}}>OK！</div>
-				</div>
-			) : null}
-
-			{/* 「生活係の仕事は完了です」 */}
-			{frame >= complete ? (
-				<div
-					style={{
-						position: 'absolute',
-						left: 60,
-						top: 440,
-						background: COLORS.green,
-						color: '#fff',
-						fontSize: 76,
-						fontWeight: 700,
-						borderRadius: 30,
-						padding: '16px 50px',
-						boxShadow: `0 12px 30px rgba(23,163,90,0.4)`,
-						...bounceIn(frame, complete),
-						transformOrigin: 'left center',
-						whiteSpace: 'nowrap',
-					}}
-				>
-					生活係の仕事 完了！
-				</div>
-			) : null}
-
 			<Sfx name="ok" at={ok} />
-		</SceneFrame>
+		</StylishFrame>
 	);
 };

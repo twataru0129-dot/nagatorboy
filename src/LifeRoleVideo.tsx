@@ -15,6 +15,7 @@ import {LinenScene} from './scenes/LinenScene';
 import {MorningScene} from './scenes/MorningScene';
 import {ReportScene} from './scenes/ReportScene';
 import {RoomCheckScene} from './scenes/RoomCheckScene';
+import {INK} from './design/tokens';
 import {FONT_FAMILY} from './theme';
 
 loadFonts();
@@ -43,7 +44,7 @@ export const LifeRoleVideo: React.FC<LifeRoleVideoProps> = ({assets, durations})
 
 	return (
 		<AssetContext.Provider value={assets}>
-			<AbsoluteFill style={{backgroundColor: '#fff', fontFamily: FONT_FAMILY}}>
+			<AbsoluteFill style={{backgroundColor: INK.base, fontFamily: FONT_FAMILY}}>
 				{timeline.map(({key, from, durationInFrames}) => {
 					const Scene = SCENE_COMPONENTS[key];
 					const hasSceneAudio = Boolean(assets.sceneNarration[key]);

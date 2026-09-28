@@ -3,10 +3,11 @@ import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {overshoot, pop, progress} from '../components/anim';
 import {punchIn} from '../components/Camera';
 import {useBeats} from '../components/Contexts';
-import {SceneFrame} from '../components/SceneFrame';
+import {StylishFrame} from '../design/StylishFrame';
+import {Eyebrow, RevealText} from '../design/Kinetic';
+import {INK} from '../design/tokens';
 import {Sfx} from '../components/Sfx';
-import {SpeechBubble} from '../components/SpeechBubble';
-import {Sparkle, TeacherCharacter} from '../components/TeacherCharacter';
+import {TeacherCharacter} from '../components/TeacherCharacter';
 import {COLORS} from '../theme';
 
 // SCENE 1 オープニング（ギャグあり）
@@ -51,7 +52,6 @@ export const IntroScene: React.FC = () => {
 	const rebound = frame >= land + 8 && frame < land + 24 ? -Math.sin(((frame - land - 8) / 16) * Math.PI) * 26 : 0;
 
 	const titleAt = b('title');
-	const titleIn = overshoot(frame, titleAt, 18, 0.2);
 	const point = b('point');
 	const jaan = b('jaan');
 	const gagIn = overshoot(frame, point + 4, 14, 0.18);
@@ -61,9 +61,11 @@ export const IntroScene: React.FC = () => {
 	const titleShrink = progress(frame, point, 14);
 
 	return (
-		<SceneFrame
+		<StylishFrame
+			accent={INK.day1}
+			wipe={false}
+			whoosh={false}
 			background={<RiverBackground frame={frame} />}
-			fadeIn={0}
 			camera={[
 				// 「みなさん、こんにちは！」で先生に少し寄る → タイトルで全体に戻る
 				{at: b('wave', 0.6), zoom: 1.18, x: 1480, y: 600, ease: 18},
@@ -117,35 +119,48 @@ export const IntroScene: React.FC = () => {
 			{/* 「シュッ！」 */}
 			<Onomatopoeia text="シュッ！" at={jump} x={jumpX - 40} y={startBottom - inBoatTeacherH - 80} color={COLORS.blue} />
 
-			{/* タイトル */}
+			{/* タイトル（映画のタイトルのように、文字がせり上がる） */}
 			<div
 				style={{
 					position: 'absolute',
-					left: 90,
-					top: 70,
-					transformOrigin: 'top left',
-					transform: `scale(${titleIn * (1 - 0.42 * titleShrink)}) rotate(${(1 - Math.min(1, titleIn)) * -6}deg)`,
-					opacity: Math.min(1, titleIn * 1.5),
-					background: 'rgba(255,255,255,0.95)',
-					borderRadius: 40,
-					padding: '34px 60px 40px',
-					boxShadow: `0 14px 40px ${COLORS.shadow}`,
-					borderLeft: `18px solid ${COLORS.blue}`,
+					left: 0,
+					top: 0,
+					width: 1300,
+					height: 520,
+					background: 'radial-gradient(ellipse at 0% 0%, rgba(10,19,38,0.75) 0%, rgba(10,19,38,0) 70%)',
+					opacity: Math.min(1, Math.max(0, (frame - titleAt) / 12)) * (1 - 0.5 * titleShrink),
 				}}
-			>
-				<div style={{fontSize: 64, fontWeight: 700, color: COLORS.blue, letterSpacing: 6}}>宿泊学習</div>
-				<div style={{fontSize: 120, fontWeight: 700, color: COLORS.text, letterSpacing: 4, lineHeight: 1.15}}>
-					生活係の<span style={{color: COLORS.green}}>仕事</span>
+			/>
+			{frame >= titleAt ? (
+				<div
+					style={{
+						position: 'absolute',
+						left: 100,
+						top: 90,
+						transformOrigin: 'top left',
+						transform: `scale(${1 - 0.45 * titleShrink})`,
+						textShadow: '0 6px 30px rgba(0,0,0,0.35)',
+					}}
+				>
+					<Eyebrow text="NAGATORO  ·  宿泊学習" at={titleAt} color="#FFFFFF" size={30} />
+					<RevealText
+						text="生活係の仕事"
+						at={titleAt + 4}
+						size={156}
+						stagger={2.2}
+						style={{marginTop: 12}}
+					/>
+					<div
+						style={{
+							height: 10,
+							width: 640 * Math.min(1, Math.max(0, (frame - titleAt - 14) / 14)),
+							background: INK.day2,
+							borderRadius: 5,
+							marginTop: 4,
+							boxShadow: `0 0 24px ${INK.day2}`,
+						}}
+					/>
 				</div>
-			</div>
-
-			{/* タイトルのキラッ */}
-			{frame >= titleAt && frame < point ? (
-				<>
-					<Sparkle x={110} y={90} size={34} scale={overshoot(frame, titleAt + 6, 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 5))} />
-					<Sparkle x={820} y={120} size={44} scale={overshoot(frame, titleAt + 10, 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 6 + 2))} />
-					<Sparkle x={760} y={330} size={28} scale={overshoot(frame, titleAt + 14, 12, 0.3) * (0.8 + 0.2 * Math.sin(frame / 4 + 1))} />
-				</>
 			) : null}
 
 			{/* ギャグ：荒川を指差して */}
@@ -161,18 +176,42 @@ export const IntroScene: React.FC = () => {
 							transformOrigin: '100% 100%',
 						}}
 					>
-						<SpeechBubble tail="right" color={COLORS.orange} fontSize={58}>
+						<div
+							style={{
+								position: 'relative',
+								background: '#fff',
+								color: INK.base,
+								borderRadius: 28,
+								borderLeft: `10px solid ${INK.point}`,
+								padding: '26px 44px',
+								fontSize: 58,
+								fontWeight: 700,
+								lineHeight: 1.35,
+								boxShadow: '0 24px 50px rgba(0,0,0,0.35)',
+							}}
+						>
 							流れが速いのは
 							<br />
 							荒川だけじゃない！
 							{frame >= jaan ? (
-								<div style={{color: COLORS.blue, marginTop: 10, ...fadeUp(frame, jaan)}}>
-									生活係の仕事の<span style={{color: COLORS.orange}}>流れ</span>も
+								<div style={{color: '#1C6FD6', marginTop: 10, ...fadeUp(frame, jaan)}}>
+									生活係の仕事の<span style={{color: '#E08A00'}}>流れ</span>も
 									<br />
 									しっかりつかもう！
 								</div>
 							) : null}
-						</SpeechBubble>
+							<div
+								style={{
+									position: 'absolute',
+									right: -26,
+									top: '50%',
+									marginTop: -20,
+									borderTop: '20px solid transparent',
+									borderBottom: '20px solid transparent',
+									borderLeft: '28px solid #fff',
+								}}
+							/>
+						</div>
 					</div>
 					<Onomatopoeia text="ジャーン！" at={jaan} x={200} y={620} color={COLORS.orange} big />
 				</>
@@ -183,7 +222,7 @@ export const IntroScene: React.FC = () => {
 			<Sfx name="whoosh" at={jump} />
 			<Sfx name="land" at={land} />
 			<Sfx name="jaan" at={jaan} volume={0.9} />
-		</SceneFrame>
+		</StylishFrame>
 	);
 };
 

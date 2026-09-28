@@ -1,169 +1,72 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
-import {appear, bounceIn, emphasize, pop} from '../components/anim';
-import {ArrowFlow} from '../components/ArrowFlow';
 import {useBeats} from '../components/Contexts';
-import {BagIcon, DoorIcon, PillowIcon, SheetIcon, StairsIcon} from '../components/Icons';
-import {ImagePlaceholder, SafeImg} from '../components/SafeImg';
-import {SceneFrame} from '../components/SceneFrame';
-import {SceneHeader} from '../components/SceneHeader';
-import {TeacherCharacter} from '../components/TeacherCharacter';
-import {COLORS} from '../theme';
+import {PhotoCard, PointCallout, StepLine} from '../design/Cards';
+import {JobHeader} from '../design/JobHeader';
+import {RevealText} from '../design/Kinetic';
+import {StylishFrame} from '../design/StylishFrame';
+import {afterSettle, SETTLE} from '../design/jobScene';
+import {INK} from '../design/tokens';
 
-// SCENE 8 2日目 ⑥リネンを回収して返す
+// SCENE 8 ⑥リネンを回収して返す
+// 仕事名 → 内容（部屋 → 回収 → 3階 → 青い返却袋） → ポイント（取り忘れがないか確認）
+
+const A = INK.day2;
 
 export const LinenReturnScene: React.FC = () => {
 	const frame = useCurrentFrame();
 	const b = useBeats();
-	const bags = pop(frame, b('bags'), 13);
-
+	const step1 = b('step1');
 	return (
-		<SceneFrame
-			hud={<SceneHeader day={2} number={6} title="リネンを回収して返す" />}
-			camera={[
-				{at: b('forget', 0.2), zoom: 1.07, x: 700, y: 820, ease: 14},
-				{at: b('forget', 2.2), zoom: 1, x: 700, y: 820, ease: 18},
-			]}
+		<StylishFrame
+			accent={A}
+			watermark="06"
+			hud={<JobHeader n={6} title="リネンを回収して返す" eyebrow="DAY 2  ·  朝" accent={A} settleAt={SETTLE} />}
 		>
-
 			{/* 「使ったリネンを回収します」 */}
-			{frame < b('step1') ? (
+			{frame < step1 ? (
 				<div
 					style={{
 						position: 'absolute',
-						left: 60,
-						top: 300,
-						display: 'flex',
-						alignItems: 'center',
-						gap: 30,
-						background: '#fff',
-						borderRadius: 40,
-						padding: '30px 60px',
-						border: `6px solid ${COLORS.green}`,
-						boxShadow: `0 10px 30px ${COLORS.shadow}`,
-						opacity: interpolate(frame, [b('step1', -0.3), b('step1')], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
-						...appear(frame, b('used'), 40, 18),
+						left: 80,
+						top: 380,
+						opacity: interpolate(frame, [step1 - 10, step1], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
 					}}
 				>
-					<SheetIcon size={180} />
-					<PillowIcon size={180} />
-					<div style={{fontSize: 84, fontWeight: 700, color: COLORS.text, whiteSpace: 'nowrap'}}>
-						使ったリネンを<span style={{color: COLORS.green}}>回収</span>
-					</div>
+					<RevealText text={'使ったリネンを\n回収する'} at={afterSettle(b('used'))} size={130} highlight={[{text: '回収', color: A}]} />
 				</div>
 			) : null}
 
-			<ArrowFlow
-				style={{position: 'absolute', left: 40, top: 240}}
-				color={COLORS.green}
-				cardWidth={350}
-				cardHeight={290}
-				fontSize={44}
-				arrowSize={76}
-				gap={10}
+			<StepLine
+				accent={A}
+				left={80}
+				top={250}
+				width={1760}
+				node={140}
+				labelSize={40}
 				steps={[
-					{label: '担当する部屋', icon: <DoorIcon size={120} />, at: b('step1')},
-					{
-						label: (
-							<span style={{fontSize: 42}}>
-								シーツ・
-								<br />
-								枕カバーを回収
-							</span>
-						),
-						icon: (
-							<div style={{display: 'flex'}}>
-								<SheetIcon size={100} />
-								<PillowIcon size={100} />
-							</div>
-						),
-						at: b('step2'),
-					},
-					{label: <span style={{display: 'inline-block', fontSize: 64, transform: `scale(${emphasize(frame, b('step3', 0.5))})`}}>3階</span>, icon: <StairsIcon size={120} />, at: b('step3')},
-					{label: <span style={{color: COLORS.blue}}>青い返却袋</span>, icon: <BagIcon size={120} />, at: b('step4')},
+					{label: '担当する部屋', icon: 'door', at: step1},
+					{label: <>シーツ・枕カバー<br />を回収</>, icon: 'sheet', at: b('step2')},
+					{label: '3階へ', icon: 'stairs', at: b('step3')},
+					{label: <span style={{color: '#7DB6FF'}}>青い返却袋</span>, icon: 'bag', at: b('step4')},
 				]}
 			/>
 
-			{/* 返却袋の写真を大きく */}
-			<div
-				style={{
-					position: 'absolute',
-					left: 200,
-					top: 570,
-					width: 500,
-					height: 470,
-					borderRadius: 30,
-					overflow: 'hidden',
-					border: `8px solid ${COLORS.blue}`,
-					boxShadow: `0 12px 30px ${COLORS.shadow}`,
-					background: '#fff',
-					opacity: Math.min(1, bags * 1.5),
-					transform: `scale(${0.6 + 0.4 * bags})`,
-				}}
-			>
-				<SafeImg
+			{frame >= b('bags') - 2 ? (
+				<PhotoCard
 					name="returnBags"
-					style={{width: '100%', height: '100%', objectPosition: '50% 100%'}}
-					fallback={
-						<ImagePlaceholder label="return-bags.png" style={{width: '100%', height: '100%'}}>
-							<div style={{display: 'flex', gap: 20}}>
-								<BagIcon size={200} />
-								<BagIcon size={200} />
-							</div>
-						</ImagePlaceholder>
-					}
+					at={b('bags')}
+					caption="RETURN BAGS  ·  3階"
+					accent={A}
+					fallbackIcon="bag"
+					position="50% 100%"
+					style={{left: 80, top: 600, width: 540, height: 420}}
 				/>
-				<div
-					style={{
-						position: 'absolute',
-						left: 0,
-						top: 0,
-						background: COLORS.blue,
-						color: '#fff',
-						fontSize: 48,
-						fontWeight: 700,
-						padding: '8px 30px',
-						borderBottomRightRadius: 24,
-					}}
-				>
-					3階・青い返却袋
-				</div>
-			</div>
+			) : null}
 
-			<div
-				style={{
-					position: 'absolute',
-					left: 790,
-					top: 760,
-					background: COLORS.orange,
-					color: '#fff',
-					fontSize: 56,
-					fontWeight: 700,
-					borderRadius: 30,
-					padding: '18px 40px',
-					boxShadow: `0 8px 20px ${COLORS.shadow}`,
-					lineHeight: 1.3,
-					...bounceIn(frame, b('forget')),
-				}}
-			>
-				取り忘れは
-				<br />
-				ないかな<span style={{display: 'inline-block', transform: `rotate(${Math.sin(frame / 6) * 12}deg)`}}>？</span>
-			</div>
-
-			<TeacherCharacter
-				height={480}
-				expression="smile"
-				cues={[
-					{at: b('used'), pose: 'explain'},
-					{at: b('step1'), pose: 'point', pointDir: 'left'},
-					{at: b('step3'), pose: 'explain', expression: 'smile'},
-					{at: b('forget'), pose: 'check', expression: 'thinking'},
-					{at: b('forget', 1.4), expression: 'serious'},
-				]}
-				nods={[b('step2', 0.4), b('step4', 0.4)]}
-				style={{right: 50, bottom: -15}}
-			/>
-		</SceneFrame>
+			<PointCallout at={b('forget')} style={{left: 700, top: 780}} size={62}>
+				取り忘れがないか、確認！
+			</PointCallout>
+		</StylishFrame>
 	);
 };
